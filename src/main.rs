@@ -1,0 +1,83 @@
+// combined from https://github.com/tafia/quick-xml
+
+
+use quick_xml::events::attributes::AttrError;
+use quick_xml::events::{BytesStart, Event};
+use quick_xml::name::QName;
+use quick_xml::reader::Reader;
+use std::any;
+use std::borrow::Cow;
+
+use std::env;
+
+#[allow(dead_code)]
+#[derive(Debug)]
+enum AppError {
+    /// XML parsing error
+    Xml(quick_xml::Error),
+    /// The `Translation/Text` node is missed
+    NoText(String),
+}
+
+impl From<quick_xml::Error> for AppError {
+    fn from(error: quick_xml::Error) -> Self {
+        Self::Xml(error)
+    }
+}
+
+impl From<AttrError> for AppError {
+    fn from(error: AttrError) -> Self {
+        Self::Xml(quick_xml::Error::InvalidAttr(error))
+    }
+}
+
+fn main() -> Result<(), AppError> {
+    let xml = r#"<tag1 att1 = "test">
+                <tag2><!--Test comment-->Test</tag2>
+                <tag2>Test 2</tag2>
+             </tag1>"#;
+
+    let filename = env::args().skip(1).next().unwrap();
+    println!("Analyzing {}", filename);
+
+    let mut reader = Reader::from_str(xml);
+    reader.config_mut().trim_text(true);
+
+    let mut count = 0;
+    let mut txt = Vec::new();
+    let mut buf = Vec::new();
+
+    loop {
+
+        match reader.read_event_into(&mut buf) {
+            Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
+
+            Ok(Event::Eof) => break,
+
+            Ok(Event::Start(e)) => {
+                println!("Start: {:?}", e.attributes());
+                match e.name().as_ref() {
+                    b"tag1" => {
+                        println!("Tag1 {e:?}");
+                        println!(
+                            "attributes values: {:?}",
+                            e.attributes().map(|a| a.unwrap().value).collect::<Vec<_>>()
+                        );
+                        let wtf = e.attributes().next().unwrap().unwrap();
+                        let s = wtf.decode_and_unescape_value(reader.decoder()).unwrap();
+                        println!("Type {}", any::type_name_of_val(&s));
+                        println!("attributes values: {:?}", s)
+                    }
+                    b"tag2" => count += 1,
+                    _ => (),
+                }
+            }
+            Ok(Event::Text(e)) => txt.push(e.unescape().unwrap().into_owned()),
+
+            _ => (),
+        }
+        buf.clear();
+    }
+
+    Ok(())
+}
