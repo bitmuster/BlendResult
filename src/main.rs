@@ -8,6 +8,7 @@ use std::env;
 use std::fs;
 use std::io;
 use std::io::Read;
+use std::str;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -31,10 +32,6 @@ impl From<AttrError> for AppError {
 }
 
 fn main() -> Result<(), AppError> {
-    let xml = r#"<tag1 att1 = "test">
-                <tag2><!--Test comment-->Test</tag2>
-                <tag2>Test 2</tag2>
-             </tag1>"#;
 
     let filename = env::args().skip(1).next().unwrap();
     println!("Analyzing {}", filename);
@@ -44,19 +41,19 @@ fn main() -> Result<(), AppError> {
     let mut reader = Reader::from_str(&xml);
     reader.config_mut().trim_text(true);
 
-    let mut count = 0;
     let mut txt = Vec::new();
     let mut buf = Vec::new();
-
+    let mut depth = 0;
     loop {
+        
         match reader.read_event_into(&mut buf) {
             Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
 
             Ok(Event::Eof) => break,
 
             Ok(Event::Start(e)) => {
-                println!("  Start {}", any::type_name_of_val(&e));
-                //println!("Start: {:?}", e.attributes());
+                //println!("  Start {}", any::type_name_of_val(&e));
+                println!("  Start: {}", str::from_utf8( e.local_name().as_ref()).unwrap());
                 /*match e.name().as_ref() {
                     b"tag1" => {
                         println!("Tag1 {e:?}");
@@ -72,13 +69,16 @@ fn main() -> Result<(), AppError> {
                     b"tag2" => count += 1,
                     _ => (),
                 }*/
+                depth +=1;
             }
             Ok(Event::Text(e)) => {
                 println!("  Text {}", any::type_name_of_val(&e));
                 txt.push(e.unescape().unwrap().into_owned())
             }
             Ok(Event::End(e)) => {
-                println!("  End {}", any::type_name_of_val(&e));
+                //println!("  End {}", any::type_name_of_val(&e));
+                println!("  End: {}", str::from_utf8( e.local_name().as_ref()).unwrap());
+                depth -= 1;
             }
             Ok(Event::Empty(e)) => {
                 println!("  Empty {}", any::type_name_of_val(&e));
