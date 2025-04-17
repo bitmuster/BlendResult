@@ -45,7 +45,7 @@ fn main() -> Result<(), AppError> {
     let mut buf = Vec::new();
     let mut depth = 0;
     loop {
-        
+        let ident = " ".repeat(depth*4+4);
         match reader.read_event_into(&mut buf) {
             Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
 
@@ -53,7 +53,7 @@ fn main() -> Result<(), AppError> {
 
             Ok(Event::Start(e)) => {
                 //println!("  Start {}", any::type_name_of_val(&e));
-                println!("  Start: {}", str::from_utf8( e.local_name().as_ref()).unwrap());
+                println!("{ident}Start: {}", str::from_utf8( e.local_name().as_ref()).unwrap());
                 /*match e.name().as_ref() {
                     b"tag1" => {
                         println!("Tag1 {e:?}");
@@ -72,19 +72,19 @@ fn main() -> Result<(), AppError> {
                 depth +=1;
             }
             Ok(Event::Text(e)) => {
-                println!("  Text {}", any::type_name_of_val(&e));
+                println!("{ident}Text {}", any::type_name_of_val(&e));
                 txt.push(e.unescape().unwrap().into_owned())
             }
             Ok(Event::End(e)) => {
                 //println!("  End {}", any::type_name_of_val(&e));
-                println!("  End: {}", str::from_utf8( e.local_name().as_ref()).unwrap());
+                println!("{ident}End: {}", str::from_utf8( e.local_name().as_ref()).unwrap());
                 depth -= 1;
             }
             Ok(Event::Empty(e)) => {
-                println!("  Empty {}", any::type_name_of_val(&e));
+                println!("{ident}Empty {}", any::type_name_of_val(&e));
             }
             Ok(Event::Decl(e)) => {
-                println!("  Decl {}", any::type_name_of_val(&e));
+                println!("{ident}Decl {}", any::type_name_of_val(&e));
             }
 
 /*            Ok(x) => {
