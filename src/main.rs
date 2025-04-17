@@ -3,6 +3,7 @@
 use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
+use quick_xml::events::attributes;
 use std::any;
 use std::env;
 use std::fs;
@@ -24,6 +25,14 @@ impl From<quick_xml::Error> for AppError {
 impl From<AttrError> for AppError {
     fn from(error: AttrError) -> Self {
         Self::Xml(quick_xml::Error::InvalidAttr(error))
+    }
+}
+
+fn print_attributes(ident:&str, attr: attributes::Attributes ) {
+    for a in attr {
+        let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
+        let value = a.unwrap().unescape_value().unwrap();
+        println!( "{ident}    Attr: {:?} {:?}",key, value);
     }
 }
 
@@ -52,6 +61,7 @@ fn main() -> Result<(), AppError> {
                     "{ident}Start: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
+                print_attributes(&ident, e.attributes());
                 depth += 1;
             }
             Ok(Event::Text(e)) => {
@@ -73,18 +83,7 @@ fn main() -> Result<(), AppError> {
                     "{ident}Empty: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
-                println!(
-                    "{ident}    Attributes: {:?}",
-                    e.attributes()
-                        .map(|x| (
-                            str::from_utf8(
-                                x.as_ref().unwrap().key.local_name().clone().into_inner()
-                            )
-                            .unwrap(),
-                            String::from(str::from_utf8(&x.unwrap().value).unwrap())
-                        ))
-                        .collect::<Vec<_>>()
-                );
+                print_attributes(&ident, e.attributes());
             }
             Ok(Event::Decl(e)) => {
                 println!("{ident}Decl {}", any::type_name_of_val(&e));
