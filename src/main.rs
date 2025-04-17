@@ -11,9 +11,7 @@ use std::str;
 #[allow(dead_code)]
 #[derive(Debug)]
 enum AppError {
-    /// XML parsing error
     Xml(quick_xml::Error),
-    /// The `Translation/Text` node is missed
     NoText(String),
 }
 
@@ -54,21 +52,6 @@ fn main() -> Result<(), AppError> {
                     "{ident}Start: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
-                /*match e.name().as_ref() {
-                    b"tag1" => {
-                        println!("Tag1 {e:?}");
-                        /*println!(
-                            "attributes values: {:?}",
-                            e.attributes().map(|a| a.unwrap().value).collect::<Vec<_>>()
-                        );*/
-                        let wtf = e.attributes().next().unwrap().unwrap();
-                        let s = wtf.decode_and_unescape_value(reader.decoder()).unwrap();
-                        println!("Type {}", any::type_name_of_val(&s));
-                        //println!("attributes values: {:?}", s)
-                    }
-                    b"tag2" => count += 1,
-                    _ => (),
-                }*/
                 depth += 1;
             }
             Ok(Event::Text(e)) => {
@@ -90,21 +73,14 @@ fn main() -> Result<(), AppError> {
                     "{ident}Empty: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
-                /*                println!(
-                    "attributes values: {:?}",
-                    e.attributes().map(|a| a.unwrap().value).collect::<Vec<_>>()
-                );*/
                 println!(
                     "{ident}    Attributes: {:?}",
-                    //e.attributes().collect::<Vec<_>>()
                     e.attributes()
-                        //.map(|x| str::from_utf8(x.unwrap().key.local_name().clone().as_ref()))
                         .map(|x| (
                             str::from_utf8(
                                 x.as_ref().unwrap().key.local_name().clone().into_inner()
                             )
                             .unwrap(),
-                            //str::from_utf8(&x.unwrap().value)
                             String::from(str::from_utf8(&x.unwrap().value).unwrap())
                         ))
                         .collect::<Vec<_>>()
