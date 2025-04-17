@@ -6,8 +6,6 @@ use quick_xml::reader::Reader;
 use std::any;
 use std::env;
 use std::fs;
-use std::io;
-use std::io::Read;
 use std::str;
 
 #[allow(dead_code)]
@@ -32,7 +30,6 @@ impl From<AttrError> for AppError {
 }
 
 fn main() -> Result<(), AppError> {
-
     let filename = env::args().skip(1).next().unwrap();
     println!("Analyzing {}", filename);
 
@@ -45,7 +42,7 @@ fn main() -> Result<(), AppError> {
     let mut buf = Vec::new();
     let mut depth = 0;
     loop {
-        let ident = " ".repeat(depth*4+4);
+        let ident = " ".repeat(depth * 4 + 4);
         match reader.read_event_into(&mut buf) {
             Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
 
@@ -53,7 +50,10 @@ fn main() -> Result<(), AppError> {
 
             Ok(Event::Start(e)) => {
                 //println!("  Start {}", any::type_name_of_val(&e));
-                println!("{ident}Start: {}", str::from_utf8( e.local_name().as_ref()).unwrap());
+                println!(
+                    "{ident}Start: {}",
+                    str::from_utf8(e.local_name().as_ref()).unwrap()
+                );
                 /*match e.name().as_ref() {
                     b"tag1" => {
                         println!("Tag1 {e:?}");
@@ -69,25 +69,52 @@ fn main() -> Result<(), AppError> {
                     b"tag2" => count += 1,
                     _ => (),
                 }*/
-                depth +=1;
+                depth += 1;
             }
             Ok(Event::Text(e)) => {
-                println!("{ident}Text {}", any::type_name_of_val(&e));
+                //println!("{ident}Text {}", any::type_name_of_val(&e));
+                println!("{ident}Text: {}", e.unescape().unwrap());
                 txt.push(e.unescape().unwrap().into_owned())
             }
             Ok(Event::End(e)) => {
                 //println!("  End {}", any::type_name_of_val(&e));
-                println!("{ident}End: {}", str::from_utf8( e.local_name().as_ref()).unwrap());
+                println!(
+                    "{ident}End: {}",
+                    str::from_utf8(e.local_name().as_ref()).unwrap()
+                );
                 depth -= 1;
             }
             Ok(Event::Empty(e)) => {
-                println!("{ident}Empty {}", any::type_name_of_val(&e));
+                //println!("{ident}Empty {}", any::type_name_of_val(&e));
+                println!(
+                    "{ident}Empty: {}",
+                    str::from_utf8(e.local_name().as_ref()).unwrap()
+                );
+                /*                println!(
+                    "attributes values: {:?}",
+                    e.attributes().map(|a| a.unwrap().value).collect::<Vec<_>>()
+                );*/
+                println!(
+                    "{ident}    Attributes: {:?}",
+                    //e.attributes().collect::<Vec<_>>()
+                    e.attributes()
+                        //.map(|x| str::from_utf8(x.unwrap().key.local_name().clone().as_ref()))
+                        .map(|x| (
+                            str::from_utf8(
+                                x.as_ref().unwrap().key.local_name().clone().into_inner()
+                            )
+                            .unwrap(),
+                            //str::from_utf8(&x.unwrap().value)
+                            String::from(str::from_utf8(&x.unwrap().value).unwrap())
+                        ))
+                        .collect::<Vec<_>>()
+                );
             }
             Ok(Event::Decl(e)) => {
                 println!("{ident}Decl {}", any::type_name_of_val(&e));
             }
 
-/*            Ok(x) => {
+            /*            Ok(x) => {
                 println!("Ok {:?}", any::type_name_of_val(&x));
             }*/
             x => {
