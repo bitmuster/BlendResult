@@ -71,11 +71,12 @@ fn main() -> Result<(), AppError> {
             }
             Ok(Event::End(e)) => {
                 //println!("  End {}", any::type_name_of_val(&e));
+                depth -= 1;
+                let ident = " ".repeat(depth * 4 + 4);
                 println!(
                     "{ident}End: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
-                depth -= 1;
             }
             Ok(Event::Empty(e)) => {
                 //println!("{ident}Empty {}", any::type_name_of_val(&e));
