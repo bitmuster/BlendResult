@@ -3,6 +3,7 @@
 use std::env;
 use std::fs;
 mod blend_result;
+mod element;
 
 fn main() -> Result<(), String> {
     let filename = env::args().skip(1).next().unwrap();

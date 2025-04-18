@@ -7,6 +7,8 @@ use std::env;
 use std::fs;
 use std::str;
 
+use crate::element::{Element, ElementType, ResultType};
+
 #[allow(dead_code)]
 #[derive(Debug)]
 enum AppError {
@@ -32,24 +34,6 @@ fn print_attributes(ident: &str, attr: attributes::Attributes) {
         let value = a.unwrap().unescape_value().unwrap();
         println!("{ident}    Attr: {:?} {:?}", key, value);
     }
-}
-
-enum ElementType {
-    Suite,
-    Test,
-    Keyword,
-}
-
-enum ResultType {
-    Pass,
-    Fail,
-    None,
-}
-
-struct Element {
-    et: ElementType,
-    children: Vec<Element>,
-    result: ResultType,
 }
 
 pub fn parse(xml_file: &str) {
