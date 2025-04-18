@@ -44,7 +44,7 @@ fn get_attr_name<'a>(name: &'a str, attr: attributes::Attributes<'a>) -> String 
         if name == key {
             return value.to_string();
         }
-    };
+    }
     "".to_string()
 }
 fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) {
@@ -70,35 +70,36 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                     b"suite" => {
                         let mut suite_element = Element {
                             et: ElementType::Suite,
-                            children: Vec::new(),
-                            parent: Weak::new(),
+                            children: RefCell::new(Vec::new()),
+                            parent: RefCell::new(Weak::new()),
                             result: ResultType::None,
-                            name
+                            name,
                         };
                         parse_inner(reader, &mut suite_element, depth + 1);
-                        element.children.push(suite_element);
+                        element.children.borrow_mut().push(Rc::new(suite_element));
                     }
                     b"test" => {
                         let mut test_element = Element {
                             et: ElementType::Test,
-                            children: Vec::new(),
-                            parent: Weak::new(),
+                            children: RefCell::new(Vec::new()),
+                            parent: RefCell::new(Weak::new()),
                             result: ResultType::None,
-                            name
+                            name,
                         };
                         parse_inner(reader, &mut test_element, depth + 1);
-                        element.children.push(test_element);
+                        element.children.borrow_mut().push(Rc::new(test_element));
                     }
                     b"kw" => {
                         let mut kw_element = Element {
                             et: ElementType::Keyword,
-                            children: Vec::new(),
-                            parent: Weak::new(),
+                            children: RefCell::new(Vec::new()),
+                            parent: RefCell::new(Weak::new()),
                             result: ResultType::None,
-                            name
+                            name,
                         };
                         parse_inner(reader, &mut kw_element, depth + 1);
-                        element.children.push(kw_element);                    },
+                        element.children.borrow_mut().push(Rc::new(kw_element));
+                    }
                     b"doc" => (),
                     b"arg" => (),
                     b"statistics" => (),
@@ -159,10 +160,10 @@ pub fn parse(xml_file: &str) {
     let depth = 0;
     let mut root_element: Element = Element {
         et: ElementType::Robot,
-        children: Vec::new(),
-        parent: Weak::new(),
+        children: RefCell::new(Vec::new()),
+        parent: RefCell::new(Weak::new()),
         result: ResultType::None,
-        name : String::new(),
+        name: String::new(),
     };
 
     parse_inner(&mut reader, &mut root_element, depth);

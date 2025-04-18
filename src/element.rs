@@ -1,4 +1,5 @@
-use std::rc::Weak;
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
 
 #[derive(Debug, PartialEq)]
 pub enum ElementType {
@@ -16,15 +17,15 @@ pub enum ResultType {
 }
 
 #[derive(Debug)]
-pub struct Element<'a> {
+pub struct Element {
     pub et: ElementType,
-    pub children: Vec<Element<'a>>,
-    pub parent: Weak<&'a Element<'a>>,
+    pub children: RefCell<Vec<Rc<Element>>>,
+    pub parent: RefCell<Weak<Element>>,
     pub result: ResultType,
-    pub name : String,
+    pub name: String,
 }
 
-impl<'a> PartialEq for Element<'a> {
+impl<'a> PartialEq for Element {
     fn eq(&self, other: &Self) -> bool {
         self.et == other.et && self.children == other.children && self.result == other.result
     }
@@ -38,67 +39,125 @@ mod test {
     fn new_elements() {
         let _elem = Element {
             et: ElementType::Suite,
-            children: Vec::new(),
-            parent: Weak::new(),
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
             result: ResultType::None,
-            name: String::new()
+            name: String::new(),
         };
         //assert
     }
 
     #[test]
     fn test_new_tree() {
-        let mut suite = Element {
+        let suite = Element {
             et: ElementType::Suite,
-            children: Vec::new(),
-            parent: Weak::new(),
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
             result: ResultType::None,
-            name: String::new()
+            name: String::new(),
         };
         let new_test = Element {
             et: ElementType::Test,
-            children: Vec::new(),
-            parent: Weak::new(),
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
             result: ResultType::Pass,
-            name: String::new()
+            name: String::new(),
         };
-        suite.children.push(new_test);
-        let new_test = Element {
+        suite.children.borrow_mut().push(Rc::new(new_test));
+        let new_test2 = Element {
             et: ElementType::Test,
-            children: Vec::new(),
-            parent: Weak::new(),
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
             result: ResultType::Fail,
-            name: String::new()
+            name: String::new(),
         };
-        suite.children.push(new_test);
+        suite.children.borrow_mut().push(Rc::new(new_test2));
         let new_kw = Element {
             et: ElementType::Keyword,
-            children: Vec::new(),
-            parent: Weak::new(),
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
             result: ResultType::None,
-            name: String::new()
+            name: String::new(),
         };
+        {
+            // Now we add the kw to the second test
+            let binding = suite.children.borrow_mut();
+            let ref_test2 = binding.get(1);
+            ref_test2
+                .unwrap()
+                .children
+                .borrow_mut()
+                .push(Rc::new(new_kw));
+        }
+        //suite.children.borrow_mut().push(Rc::new(new_kw));
         //let mut et: &mut Element = suite.children.get_mut(1).unwrap();
-        let et: &mut Element = suite.children.get_mut(1).unwrap();
-        et.children.push(new_kw);
-        assert_eq!(suite.children.get(0).unwrap().et, ElementType::Test);
-        assert_eq!(suite.children.get(0).unwrap().result, ResultType::Pass);
-        assert_eq!(suite.children.get(1).unwrap().et, ElementType::Test);
-        assert_eq!(suite.children.get(1).unwrap().result, ResultType::Fail);
+
+        /* let mut binding = suite.children.borrow_mut();
+
+        et.children.borrow_mut().push(Rc::new(new_kw));
+        */
         assert_eq!(
-            suite.children.get(1).unwrap().children.get(0).unwrap().et,
+            suite.children.borrow_mut().get(0).unwrap().et,
+            ElementType::Test
+        );
+        assert_eq!(
+            suite.children.borrow_mut().get(0).unwrap().result,
+            ResultType::Pass
+        );
+        assert_eq!(
+            suite.children.borrow_mut().get(1).unwrap().et,
+            ElementType::Test
+        );
+        assert_eq!(
+            suite.children.borrow_mut().get(1).unwrap().result,
+            ResultType::Fail
+        );
+        assert_eq!(
+            suite
+                .children
+                .borrow_mut()
+                .get(1)
+                .unwrap()
+                .children
+                .borrow_mut()
+                .get(0)
+                .unwrap()
+                .et,
             ElementType::Keyword
         );
         assert_eq!(
             suite
                 .children
+                .borrow_mut()
                 .get(1)
                 .unwrap()
                 .children
+                .borrow_mut()
                 .get(0)
                 .unwrap()
                 .result,
             ResultType::None
         );
+    }
+    #[test]
+    fn test_parent() {
+        let mut kw = Rc::new(Element {
+            et: ElementType::Keyword,
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
+            result: ResultType::None,
+            name: String::new(),
+        });
+        let mut test = Rc::new(Element {
+            et: ElementType::Test,
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
+            result: ResultType::None,
+            name: String::new(),
+        });
+
+        let mut parent = kw.parent.borrow_mut();
+        *parent = Rc::downgrade(&test);
+        test.children.borrow_mut().push(kw.clone());
     }
 }
