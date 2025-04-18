@@ -115,11 +115,11 @@ mod test {
         assert_eq!(
             suite
                 .children
-                .borrow_mut()
+                .borrow()
                 .get(1)
                 .unwrap()
                 .children
-                .borrow_mut()
+                .borrow()
                 .get(0)
                 .unwrap()
                 .et,
@@ -141,14 +141,14 @@ mod test {
     }
     #[test]
     fn test_parent() {
-        let mut kw = Rc::new(Element {
+        let kw = Rc::new(Element {
             et: ElementType::Keyword,
             children: RefCell::new(Vec::new()),
             parent: RefCell::new(Weak::new()),
             result: ResultType::None,
             name: String::new(),
         });
-        let mut test = Rc::new(Element {
+        let test = Rc::new(Element {
             et: ElementType::Test,
             children: RefCell::new(Vec::new()),
             parent: RefCell::new(Weak::new()),
