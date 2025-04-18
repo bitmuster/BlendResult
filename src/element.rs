@@ -21,6 +21,7 @@ pub struct Element<'a> {
     pub children: Vec<Element<'a>>,
     pub parent: Weak<&'a Element<'a>>,
     pub result: ResultType,
+    pub name : String,
 }
 
 impl<'a> PartialEq for Element<'a> {
@@ -40,6 +41,7 @@ mod test {
             children: Vec::new(),
             parent: Weak::new(),
             result: ResultType::None,
+            name: String::new()
         };
         //assert
     }
@@ -51,12 +53,14 @@ mod test {
             children: Vec::new(),
             parent: Weak::new(),
             result: ResultType::None,
+            name: String::new()
         };
         let new_test = Element {
             et: ElementType::Test,
             children: Vec::new(),
             parent: Weak::new(),
             result: ResultType::Pass,
+            name: String::new()
         };
         suite.children.push(new_test);
         let new_test = Element {
@@ -64,6 +68,7 @@ mod test {
             children: Vec::new(),
             parent: Weak::new(),
             result: ResultType::Fail,
+            name: String::new()
         };
         suite.children.push(new_test);
         let new_kw = Element {
@@ -71,6 +76,7 @@ mod test {
             children: Vec::new(),
             parent: Weak::new(),
             result: ResultType::None,
+            name: String::new()
         };
         //let mut et: &mut Element = suite.children.get_mut(1).unwrap();
         let et: &mut Element = suite.children.get_mut(1).unwrap();

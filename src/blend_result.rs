@@ -37,6 +37,16 @@ fn print_attributes(ident: &str, attr: attributes::Attributes) {
     }
 }
 
+fn get_attr_name<'a>(name: &'a str, attr: attributes::Attributes<'a>) -> String {
+    for a in attr {
+        let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
+        let value = a.unwrap().unescape_value().unwrap();
+        if name == key {
+            return value.to_string();
+        }
+    };
+    "".to_string()
+}
 fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) {
     let mut buf = Vec::new();
 
@@ -54,7 +64,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
                 print_attributes(&ident, e.attributes());
-
+                let name = get_attr_name("name", e.attributes());
                 match e.name().as_ref() {
                     b"robot" => (),
                     b"suite" => {
@@ -63,10 +73,10 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             children: Vec::new(),
                             parent: Weak::new(),
                             result: ResultType::None,
+                            name
                         };
                         parse_inner(reader, &mut suite_element, depth + 1);
                         element.children.push(suite_element);
-                        //current = current.children.last_mut().unwrap();
                     }
                     b"test" => {
                         let mut test_element = Element {
@@ -74,11 +84,10 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             children: Vec::new(),
                             parent: Weak::new(),
                             result: ResultType::None,
+                            name
                         };
-                        //println!("{:?}", test_element);
                         parse_inner(reader, &mut test_element, depth + 1);
                         element.children.push(test_element);
-                        //println!("Root {:?}", element);
                     }
                     b"kw" => (),
                     b"doc" => (),
@@ -143,6 +152,7 @@ pub fn parse(xml_file: &str) {
         children: Vec::new(),
         parent: Weak::new(),
         result: ResultType::None,
+        name : String::new(),
     };
 
     parse_inner(&mut reader, &mut root_element, depth);
