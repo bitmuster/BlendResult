@@ -76,7 +76,10 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             name,
                         };
                         parse_inner(reader, &mut suite_element, depth + 1);
-                        element.children.borrow_mut().push(Rc::new(suite_element));
+                        let mut parent = element.parent.borrow_mut();
+                        let rc_suite_element = Rc::new(suite_element);
+                        *parent = Rc::downgrade(&rc_suite_element);
+                        element.children.borrow_mut().push(rc_suite_element);
                     }
                     b"test" => {
                         let mut test_element = Element {
@@ -87,7 +90,10 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             name,
                         };
                         parse_inner(reader, &mut test_element, depth + 1);
-                        element.children.borrow_mut().push(Rc::new(test_element));
+                        let mut parent = element.parent.borrow_mut();
+                        let rc_element = Rc::new(test_element);
+                        *parent = Rc::downgrade(&rc_element);
+                        element.children.borrow_mut().push(rc_element);
                     }
                     b"kw" => {
                         let mut kw_element = Element {
@@ -98,7 +104,10 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             name,
                         };
                         parse_inner(reader, &mut kw_element, depth + 1);
-                        element.children.borrow_mut().push(Rc::new(kw_element));
+                        let mut parent = element.parent.borrow_mut();
+                        let rc_element = Rc::new(kw_element);
+                        *parent = Rc::downgrade(&rc_element);
+                        element.children.borrow_mut().push(rc_element);
                     }
                     b"doc" => (),
                     b"arg" => (),

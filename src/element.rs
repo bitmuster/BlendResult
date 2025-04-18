@@ -89,13 +89,7 @@ mod test {
                 .borrow_mut()
                 .push(Rc::new(new_kw));
         }
-        //suite.children.borrow_mut().push(Rc::new(new_kw));
-        //let mut et: &mut Element = suite.children.get_mut(1).unwrap();
 
-        /* let mut binding = suite.children.borrow_mut();
-
-        et.children.borrow_mut().push(Rc::new(new_kw));
-        */
         assert_eq!(
             suite.children.borrow_mut().get(0).unwrap().et,
             ElementType::Test
