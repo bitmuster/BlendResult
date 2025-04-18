@@ -1,4 +1,3 @@
-
 #[derive(Debug, PartialEq)]
 pub enum ElementType {
     Suite,
@@ -25,7 +24,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn new_elements(){
+    fn new_elements() {
         let _elem = Element {
             et: ElementType::Suite,
             children: Vec::new(),
@@ -33,7 +32,7 @@ mod test {
         };
         //assert
     }
-    
+
     #[test]
     fn test_new_tree() {
         let mut suite = Element {
@@ -61,11 +60,24 @@ mod test {
         //let mut et: &mut Element = suite.children.get_mut(1).unwrap();
         let et: &mut Element = suite.children.get_mut(1).unwrap();
         et.children.push(new_kw);
-        assert_eq!( suite.children.get(0).unwrap().et, ElementType::Test);
-        assert_eq!( suite.children.get(0).unwrap().result, ResultType::Pass);
-        assert_eq!( suite.children.get(1).unwrap().et, ElementType::Test);
-        assert_eq!( suite.children.get(1).unwrap().result, ResultType::Fail);
-        assert_eq!( suite.children.get(1).unwrap().children.get(0).unwrap().et, ElementType::Keyword);
-        assert_eq!( suite.children.get(1).unwrap().children.get(0).unwrap().result, ResultType::None);
+        assert_eq!(suite.children.get(0).unwrap().et, ElementType::Test);
+        assert_eq!(suite.children.get(0).unwrap().result, ResultType::Pass);
+        assert_eq!(suite.children.get(1).unwrap().et, ElementType::Test);
+        assert_eq!(suite.children.get(1).unwrap().result, ResultType::Fail);
+        assert_eq!(
+            suite.children.get(1).unwrap().children.get(0).unwrap().et,
+            ElementType::Keyword
+        );
+        assert_eq!(
+            suite
+                .children
+                .get(1)
+                .unwrap()
+                .children
+                .get(0)
+                .unwrap()
+                .result,
+            ResultType::None
+        );
     }
 }

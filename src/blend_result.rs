@@ -3,8 +3,6 @@ use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
 use std::any;
-use std::env;
-use std::fs;
 use std::str;
 
 use crate::element::{Element, ElementType, ResultType};
@@ -40,11 +38,10 @@ pub fn parse(xml_file: &str) {
     let mut reader = Reader::from_str(&xml_file);
     reader.config_mut().trim_text(true);
 
-    let mut txt = Vec::new();
     let mut buf = Vec::new();
     let mut depth = 0;
     let mut root_element: Option<Element> = None;
-    let mut current: Option<&Element> = None;
+    let mut current: Option<&mut Element> = None;
     loop {
         let ident = " ".repeat(depth * 4 + 4);
         match reader.read_event_into(&mut buf) {
@@ -61,14 +58,14 @@ pub fn parse(xml_file: &str) {
                 print_attributes(&ident, e.attributes());
 
                 match e.name().as_ref() {
+                    b"robot" => (),
                     b"suite" => {
                         root_element = Some(Element {
                             et: ElementType::Suite,
                             children: Vec::new(),
                             result: ResultType::None,
                         });
-                        let re = root_element.unwrap();
-                        current = Some(&re);
+                        current = Some(root_element.as_mut().unwrap());
                     }
                     b"test" => {
                         let mut new_element = Element {
@@ -76,17 +73,24 @@ pub fn parse(xml_file: &str) {
                             children: Vec::new(),
                             result: ResultType::None,
                         };
-                        //current.unwrap().children.push(new_element);
+                        current.as_mut().unwrap().children.push(new_element);
                         //current = Some(&current.unwrap());
                     }
-                    _ => (),
+                    b"kw" => (),
+                    b"doc" => (),
+                    b"arg" => (),
+                    b"statistics" => (),
+                    b"total" => (),
+                    b"errors" => (),
+                    b"stat" => (),
+                    b"tag" => (),
+                    s => println!("Unmatched {:?}", str::from_utf8(s).unwrap()),
                 }
                 depth += 1;
             }
             Ok(Event::Text(e)) => {
                 //println!("{ident}Text {}", any::type_name_of_val(&e));
                 println!("{ident}Text: {}", e.unescape().unwrap());
-                txt.push(e.unescape().unwrap().into_owned())
             }
             Ok(Event::End(e)) => {
                 //println!("  End {}", any::type_name_of_val(&e));
@@ -118,4 +122,6 @@ pub fn parse(xml_file: &str) {
         }
         buf.clear();
     }
+
+    println!("{:?}", root_element.unwrap());
 }
