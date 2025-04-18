@@ -1,9 +1,9 @@
 // combined from https://github.com/tafia/quick-xml
 
+use quick_xml::events::attributes;
 use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
-use quick_xml::events::attributes;
 use std::any;
 use std::env;
 use std::fs;
@@ -28,12 +28,30 @@ impl From<AttrError> for AppError {
     }
 }
 
-fn print_attributes(ident:&str, attr: attributes::Attributes ) {
+fn print_attributes(ident: &str, attr: attributes::Attributes) {
     for a in attr {
         let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
         let value = a.unwrap().unescape_value().unwrap();
-        println!( "{ident}    Attr: {:?} {:?}",key, value);
+        println!("{ident}    Attr: {:?} {:?}", key, value);
     }
+}
+
+enum ElementType {
+    Suite,
+    Test,
+    Keyword,
+}
+
+enum ResultType {
+    Pass,
+    Fail,
+    None,
+}
+
+struct Element {
+    et: ElementType,
+    children: Vec<Element>,
+    result: ResultType,
 }
 
 fn main() -> Result<(), AppError> {
@@ -48,6 +66,8 @@ fn main() -> Result<(), AppError> {
     let mut txt = Vec::new();
     let mut buf = Vec::new();
     let mut depth = 0;
+    let mut root_element: Option<Element> = None;
+    let mut current: Option<&Element> = None;
     loop {
         let ident = " ".repeat(depth * 4 + 4);
         match reader.read_event_into(&mut buf) {
@@ -62,6 +82,28 @@ fn main() -> Result<(), AppError> {
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
                 print_attributes(&ident, e.attributes());
+
+                match e.name().as_ref() {
+                    b"suite" => {
+                        root_element = Some(Element {
+                            et: ElementType::Suite,
+                            children: Vec::new(),
+                            result: ResultType::None,
+                        });
+                        let re = root_element.unwrap();
+                        current = Some(&re);
+                    }
+                    b"test" => {
+                        let mut new_element = Element {
+                            et: ElementType::Test,
+                            children: Vec::new(),
+                            result: ResultType::None,
+                        };
+                        //current.unwrap().children.push(new_element);
+                        //current = Some(&current.unwrap());
+                    }
+                    _ => (),
+                }
                 depth += 1;
             }
             Ok(Event::Text(e)) => {
