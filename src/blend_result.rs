@@ -37,20 +37,10 @@ fn print_attributes(ident: &str, attr: attributes::Attributes) {
     }
 }
 
-pub fn parse(xml_file: &str) {
-    let mut reader = Reader::from_str(&xml_file);
-    reader.config_mut().trim_text(true);
+fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize){
+        let mut buf = Vec::new();
 
-    let mut buf = Vec::new();
-    let mut depth = 0;
-    let root_element: Rc<RefCell<Element>> = Rc::new(RefCell::new(Element {
-        et: ElementType::Robot,
-        children: Vec::new(),
-        parent: Weak::new(),
-        result: ResultType::None,
-    }));
-    let binding = root_element.clone();
-    loop {
+        loop {
         let ident = " ".repeat(depth * 4 + 4);
         match reader.read_event_into(&mut buf) {
             Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
@@ -74,7 +64,8 @@ pub fn parse(xml_file: &str) {
                             parent: Weak::new(),
                             result: ResultType::None,
                         };
-                        //current.children.push(suite_element);
+                        parse_inner(reader, &mut suite_element, depth+1);
+                        element.children.push(suite_element);
                         //current = current.children.last_mut().unwrap();
                     }
                     b"test" => {
@@ -84,12 +75,10 @@ pub fn parse(xml_file: &str) {
                             parent: Weak::new(),
                             result: ResultType::None,
                         };
-                        println!("{:?}", test_element);
-                        //println!("{:?}", current);
-                        //current.children.push(test_element);
-                        //current = current.children.last_mut().unwrap();
-                        // println!("{:?}", current);
-                        println!("Root {:?}", root_element);
+                        //println!("{:?}", test_element);
+                        parse_inner(reader, &mut test_element, depth+1);
+                        element.children.push(test_element);
+                        //println!("Root {:?}", element);
                     }
                     b"kw" => (),
                     b"doc" => (),
@@ -101,21 +90,25 @@ pub fn parse(xml_file: &str) {
                     b"tag" => (),
                     s => println!("Unmatched {:?}", str::from_utf8(s).unwrap()),
                 }
-                depth += 1;
             }
             Ok(Event::Text(e)) => {
                 //println!("{ident}Text {}", any::type_name_of_val(&e));
-                println!("{ident}Text: {}", e.unescape().unwrap());
+                println!("{ident}    Text: {}", e.unescape().unwrap());
             }
             Ok(Event::End(e)) => {
                 //println!("  End {}", any::type_name_of_val(&e));
-                depth -= 1;
                 let ident = " ".repeat(depth * 4 + 4);
                 println!(
                     "{ident}End: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
-                //current = current.children.last_mut().unwrap();
+                
+                match e.name().as_ref() {
+                    b"robot" => break,
+                    b"suite" => break,
+                    b"test" => break,
+                    _ => ()
+                }
             }
             Ok(Event::Empty(e)) => {
                 //println!("{ident}Empty {}", any::type_name_of_val(&e));
@@ -138,7 +131,22 @@ pub fn parse(xml_file: &str) {
         }
         buf.clear();
     }
+}
 
-    println!("{:#?}", root_element.borrow());
+pub fn parse(xml_file: &str) {
+    let mut reader = Reader::from_str(&xml_file);
+    reader.config_mut().trim_text(true);
+
+    let depth = 0;
+    let mut root_element: Element = Element {
+        et: ElementType::Robot,
+        children: Vec::new(),
+        parent: Weak::new(),
+        result: ResultType::None,
+    };
+
+    parse_inner(&mut reader, &mut root_element, depth);
+
+    println!("Root {:#?}", root_element);
     //println!("{:?}", current);
 }
