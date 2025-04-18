@@ -89,7 +89,16 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                         parse_inner(reader, &mut test_element, depth + 1);
                         element.children.push(test_element);
                     }
-                    b"kw" => (),
+                    b"kw" => {
+                        let mut kw_element = Element {
+                            et: ElementType::Keyword,
+                            children: Vec::new(),
+                            parent: Weak::new(),
+                            result: ResultType::None,
+                            name
+                        };
+                        parse_inner(reader, &mut kw_element, depth + 1);
+                        element.children.push(kw_element);                    },
                     b"doc" => (),
                     b"arg" => (),
                     b"statistics" => (),
@@ -116,6 +125,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                     b"robot" => break,
                     b"suite" => break,
                     b"test" => break,
+                    b"kw" => break,
                     _ => (),
                 }
             }
