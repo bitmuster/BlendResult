@@ -47,6 +47,19 @@ fn get_attr_name<'a>(name: &'a str, attr: attributes::Attributes<'a>) -> String 
     }
     "".to_string()
 }
+
+fn status_to_result(status: &str) -> ResultType {
+    match status {
+        "PASS" => ResultType::Pass,
+        "FAIL" => ResultType::Fail,
+        s => {
+            //panic!("Panic:  {s}");
+            println!("Panic:  {s}");
+            ResultType::None
+        }
+    }
+}
+
 fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) {
     let mut buf = Vec::new();
 
@@ -65,6 +78,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                 );
                 print_attributes(&ident, e.attributes());
                 let name = get_attr_name("name", e.attributes());
+                let status = get_attr_name("status", e.attributes());
                 match e.name().as_ref() {
                     b"robot" => (),
                     b"suite" => {
@@ -72,7 +86,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             et: ElementType::Suite,
                             children: RefCell::new(Vec::new()),
                             parent: RefCell::new(Weak::new()),
-                            result: ResultType::None,
+                            result: status_to_result(&status),
                             name,
                         };
                         parse_inner(reader, &mut suite_element, depth + 1);
@@ -86,7 +100,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             et: ElementType::Test,
                             children: RefCell::new(Vec::new()),
                             parent: RefCell::new(Weak::new()),
-                            result: ResultType::None,
+                            result: status_to_result(&status),
                             name,
                         };
                         parse_inner(reader, &mut test_element, depth + 1);
@@ -100,7 +114,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             et: ElementType::Keyword,
                             children: RefCell::new(Vec::new()),
                             parent: RefCell::new(Weak::new()),
-                            result: ResultType::None,
+                            result: status_to_result(&status),
                             name,
                         };
                         parse_inner(reader, &mut kw_element, depth + 1);
@@ -179,4 +193,19 @@ pub fn parse(xml_file: &str) {
 
     println!("Root {:#?}", root_element);
     //println!("{:?}", current);
+
+    dump_flat(&root_element);
+}
+
+fn dump_flat(element: &Element) {
+    println!("Flat Dump:");
+    println!("{:?}; {}", element.et, element.name);
+    dump_flat_inner(element);
+}
+
+fn dump_flat_inner(element: &Element) {
+    for child in element.children.borrow().iter() {
+        println!("{:?}; {}; {:?}", child.et, child.name, child.result);
+        dump_flat_inner(child);
+    }
 }
