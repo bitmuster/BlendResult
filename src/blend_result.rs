@@ -68,30 +68,26 @@ pub fn parse(xml_file: &str) {
                     match e.name().as_ref() {
                         b"robot" => (),
                         b"suite" => {
-                            let suite_element = Element {
+                            let mut suite_element = Element {
                                 et: ElementType::Suite,
                                 children: Vec::new(),
                                 result: ResultType::None,
                             };
-                            //let mut curr = current.borrow_mut();
                             current.children.push(suite_element);
-                            //let mut new = *curr.children.last_mut().unwrap();
-                            //*curr = new;
-
-                            //current = Rc::new(RefCell::new(suite_element));
+                            current = current.children.last_mut().unwrap();
                         }
                         b"test" => {
-                            let mut new_element = Element {
+                            let mut test_element = Element {
                                 et: ElementType::Test,
                                 children: Vec::new(),
                                 result: ResultType::None,
                             };
-                            println!("{:?}", new_element);
+                            println!("{:?}", test_element);
                             println!("{:?}", current);
-                            //current.as_mut().unwrap().children.push(new_element);
+                            current.children.push(test_element);
+                            current = current.children.last_mut().unwrap();
                             println!("{:?}", current);
                             println!("Root {:?}", root_element);
-                            //current = Some(current.as_mut().unwrap());
                         }
                         b"kw" => (),
                         b"doc" => (),
@@ -117,6 +113,7 @@ pub fn parse(xml_file: &str) {
                         "{ident}End: {}",
                         str::from_utf8(e.local_name().as_ref()).unwrap()
                     );
+                    //current = current.children.last_mut().unwrap();
                 }
                 Ok(Event::Empty(e)) => {
                     //println!("{ident}Empty {}", any::type_name_of_val(&e));
@@ -140,6 +137,6 @@ pub fn parse(xml_file: &str) {
             buf.clear();
         }
     }
-    println!("{:?}", root_element.borrow());
+    println!("{:#?}", root_element.borrow());
     //println!("{:?}", current);
 }
