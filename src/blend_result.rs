@@ -5,6 +5,7 @@ use quick_xml::reader::Reader;
 use std::any;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::rc::Weak;
 use std::str;
 
 use crate::element::{Element, ElementType, ResultType};
@@ -45,6 +46,7 @@ pub fn parse(xml_file: &str) {
     let root_element: Rc<RefCell<Element>> = Rc::new(RefCell::new(Element {
         et: ElementType::Robot,
         children: Vec::new(),
+        parent : Weak::new(),
         result: ResultType::None,
     }));
     let binding = root_element.clone();
@@ -68,9 +70,13 @@ pub fn parse(xml_file: &str) {
                     match e.name().as_ref() {
                         b"robot" => (),
                         b"suite" => {
+                            let wtf : &Element = current;
+                            let parent = Rc::new(wtf);
+                            let weak_parent = Rc::downgrade(&parent);
                             let mut suite_element = Element {
                                 et: ElementType::Suite,
                                 children: Vec::new(),
+                                parent : weak_parent,
                                 result: ResultType::None,
                             };
                             current.children.push(suite_element);
@@ -80,6 +86,7 @@ pub fn parse(xml_file: &str) {
                             let mut test_element = Element {
                                 et: ElementType::Test,
                                 children: Vec::new(),
+                                parent : Weak::new(),
                                 result: ResultType::None,
                             };
                             println!("{:?}", test_element);

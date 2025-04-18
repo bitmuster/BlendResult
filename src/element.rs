@@ -1,3 +1,5 @@
+use std::rc::Weak;
+
 #[derive(Debug, PartialEq)]
 pub enum ElementType {
     Robot,
@@ -13,11 +15,20 @@ pub enum ResultType {
     None,
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Element {
+#[derive(Debug)]
+pub struct Element<'a> {
     pub et: ElementType,
-    pub children: Vec<Element>,
+    pub children: Vec<Element<'a>>,
+    pub parent: Weak<&'a Element<'a>>,
     pub result: ResultType,
+}
+
+impl<'a> PartialEq for Element<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        self.et == other.et &&
+        self.children == other.children &&
+        self.result == other.result
+    }
 }
 
 #[cfg(test)]
@@ -29,6 +40,7 @@ mod test {
         let _elem = Element {
             et: ElementType::Suite,
             children: Vec::new(),
+            parent : Weak::new(),
             result: ResultType::None,
         };
         //assert
@@ -39,23 +51,27 @@ mod test {
         let mut suite = Element {
             et: ElementType::Suite,
             children: Vec::new(),
+            parent : Weak::new(),
             result: ResultType::None,
         };
         let new_test = Element {
             et: ElementType::Test,
             children: Vec::new(),
+            parent : Weak::new(),
             result: ResultType::Pass,
         };
         suite.children.push(new_test);
         let new_test = Element {
             et: ElementType::Test,
             children: Vec::new(),
+            parent : Weak::new(),
             result: ResultType::Fail,
         };
         suite.children.push(new_test);
         let new_kw = Element {
             et: ElementType::Keyword,
             children: Vec::new(),
+            parent : Weak::new(),
             result: ResultType::None,
         };
         //let mut et: &mut Element = suite.children.get_mut(1).unwrap();
