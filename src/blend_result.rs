@@ -37,10 +37,10 @@ fn print_attributes(ident: &str, attr: attributes::Attributes) {
     }
 }
 
-fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize){
-        let mut buf = Vec::new();
+fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) {
+    let mut buf = Vec::new();
 
-        loop {
+    loop {
         let ident = " ".repeat(depth * 4 + 4);
         match reader.read_event_into(&mut buf) {
             Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
@@ -64,7 +64,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize){
                             parent: Weak::new(),
                             result: ResultType::None,
                         };
-                        parse_inner(reader, &mut suite_element, depth+1);
+                        parse_inner(reader, &mut suite_element, depth + 1);
                         element.children.push(suite_element);
                         //current = current.children.last_mut().unwrap();
                     }
@@ -76,7 +76,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize){
                             result: ResultType::None,
                         };
                         //println!("{:?}", test_element);
-                        parse_inner(reader, &mut test_element, depth+1);
+                        parse_inner(reader, &mut test_element, depth + 1);
                         element.children.push(test_element);
                         //println!("Root {:?}", element);
                     }
@@ -102,12 +102,12 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize){
                     "{ident}End: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
-                
+
                 match e.name().as_ref() {
                     b"robot" => break,
                     b"suite" => break,
                     b"test" => break,
-                    _ => ()
+                    _ => (),
                 }
             }
             Ok(Event::Empty(e)) => {
