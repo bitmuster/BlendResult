@@ -1,5 +1,6 @@
 #[derive(Debug, PartialEq)]
 pub enum ElementType {
+    Robot,
     Suite,
     Test,
     Keyword,
