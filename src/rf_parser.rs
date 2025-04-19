@@ -7,6 +7,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::str;
+use anyhow::{Result,Context};
 
 use crate::element::{Element, ElementType, ResultType};
 
@@ -60,7 +61,7 @@ fn status_to_result(status: &str) -> ResultType {
     }
 }
 
-fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) {
+fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) -> anyhow::Result<()>{
     let mut buf = Vec::new();
 
     loop {
@@ -179,10 +180,11 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
             }
         }
         buf.clear();
-    }
+    };
+    Ok(())
 }
 
-pub fn parse(xml_file: &str) {
+pub fn parse(xml_file: &str) -> anyhow::Result<()>{
     let mut reader = Reader::from_str(xml_file);
     reader.config_mut().trim_text(true);
 
@@ -195,12 +197,13 @@ pub fn parse(xml_file: &str) {
         name: String::new(),
     };
 
-    parse_inner(&mut reader, &mut root_element, depth);
+    parse_inner(&mut reader, &mut root_element, depth)?;
 
     println!("Root {:#?}", root_element);
     //println!("{:?}", current);
 
     dump_flat(&root_element);
+    Ok(())
 }
 
 fn dump_flat(element: &Element) {
