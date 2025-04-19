@@ -1,15 +1,16 @@
 use std::fs;
 mod common;
+use anyhow::{Context, Result};
 use blend_result::element::*;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 #[test]
-fn test_stuff() {
+fn test_stuff() -> anyhow::Result<()> {
     common::run_rf_test_a();
     let filename = "robot/results/output_a.xml";
     let xml = fs::read_to_string(filename).unwrap();
-    let results = blend_result::parse(&xml);
+    let results = blend_result::parse(&xml).context("Parsing failed")?;
 
     let expect = ResultList {
         list: Rc::new(RefCell::new(vec![
@@ -55,4 +56,6 @@ fn test_stuff() {
             },
         ])),
     };
+    assert_eq!(results, expect);
+    Ok(())
 }

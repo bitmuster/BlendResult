@@ -31,7 +31,7 @@ impl PartialEq for Element {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct ElementFlat {
     pub et: ElementType,
     pub result: ResultType,
@@ -41,6 +41,19 @@ pub struct ElementFlat {
 #[derive(Debug)]
 pub struct ResultList {
     pub list: Rc<RefCell<Vec<ElementFlat>>>,
+}
+
+impl PartialEq for ResultList {
+    fn eq(&self, other: &Self) -> bool {
+        let mut equal = true;
+        for (a, b) in self.list.borrow().iter().zip(other.list.borrow().iter()) {
+            if a == b {
+            } else {
+                equal = false;
+            }
+        }
+        equal
+    }
 }
 
 #[cfg(test)]
