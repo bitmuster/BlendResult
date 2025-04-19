@@ -1,4 +1,3 @@
-use anyhow::{Context, Result};
 use quick_xml::events::attributes;
 use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
@@ -93,7 +92,7 @@ fn parse_inner(
                             result: ResultType::None,
                             name,
                         };
-                        parse_inner(reader, &mut suite_element, depth + 1);
+                        parse_inner(reader, &mut suite_element, depth + 1)?;
                         let mut parent = element.parent.borrow_mut();
                         let rc_suite_element = Rc::new(suite_element);
                         *parent = Rc::downgrade(&rc_suite_element);
@@ -107,7 +106,7 @@ fn parse_inner(
                             result: ResultType::None,
                             name,
                         };
-                        parse_inner(reader, &mut test_element, depth + 1);
+                        parse_inner(reader, &mut test_element, depth + 1)?;
                         let mut parent = element.parent.borrow_mut();
                         let rc_element = Rc::new(test_element);
                         *parent = Rc::downgrade(&rc_element);
@@ -121,7 +120,7 @@ fn parse_inner(
                             result: ResultType::None,
                             name,
                         };
-                        parse_inner(reader, &mut kw_element, depth + 1);
+                        parse_inner(reader, &mut kw_element, depth + 1)?;
                         let mut parent = element.parent.borrow_mut();
                         let rc_element = Rc::new(kw_element);
                         *parent = Rc::downgrade(&rc_element);
@@ -129,9 +128,7 @@ fn parse_inner(
                     }
                     b"doc" => (),
                     b"arg" => (),
-                    b"statistics" => {
-                        break
-                    },
+                    b"statistics" => break,
                     b"total" => (),
                     b"errors" => (),
                     b"stat" => (),

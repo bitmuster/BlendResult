@@ -1,6 +1,6 @@
 use std::fs;
 mod common;
-use anyhow::{Context, Result};
+use anyhow::{self, Context};
 use blend_result::element::*;
 use std::cell::RefCell;
 use std::rc::Rc;
