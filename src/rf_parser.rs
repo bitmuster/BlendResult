@@ -232,9 +232,9 @@ fn dump_flat_inner(element: &Element, results: &mut ResultList) {
     for child in element.children.borrow().iter() {
         println!("{:?}; {}; {:?}", child.et, child.name, child.result);
         results.list.borrow_mut().push(ElementFlat {
-            et: element.et.clone(),
-            name: element.name.clone(),
-            result: element.result.clone(),
+            et: child.et.clone(),
+            name: child.name.clone(),
+            result: child.result.clone(),
         });
         dump_flat_inner(child, results);
     }

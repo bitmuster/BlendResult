@@ -20,11 +20,6 @@ fn test_stuff() -> anyhow::Result<()> {
                 name: String::from(""),
             },
             ElementFlat {
-                et: ElementType::Robot,
-                result: ResultType::None,
-                name: String::from(""),
-            },
-            ElementFlat {
                 et: ElementType::Suite,
                 result: ResultType::Pass,
                 name: String::from("Test A"),
@@ -35,9 +30,9 @@ fn test_stuff() -> anyhow::Result<()> {
                 name: String::from("Demo Test A"),
             },
             ElementFlat {
-                et: ElementType::Suite,
+                et: ElementType::Keyword,
                 result: ResultType::Pass,
-                name: String::from("Test A"),
+                name: String::from("No Operation"),
             },
             ElementFlat {
                 et: ElementType::Test,
@@ -50,7 +45,12 @@ fn test_stuff() -> anyhow::Result<()> {
                 name: String::from("Keyword B"),
             },
             ElementFlat {
-                et: ElementType::Robot,
+                et: ElementType::Keyword,
+                result: ResultType::Pass,
+                name: String::from("No Operation"),
+            },
+            ElementFlat {
+                et: ElementType::Suite,
                 result: ResultType::None,
                 name: String::from(""),
             },
