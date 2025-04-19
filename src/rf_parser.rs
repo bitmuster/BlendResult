@@ -188,7 +188,7 @@ fn parse_inner(
     Ok(())
 }
 
-pub fn parse(xml_file: &str) -> anyhow::Result<ResultList> {
+pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     let mut reader = Reader::from_str(xml_file);
     reader.config_mut().trim_text(true);
 
@@ -214,13 +214,13 @@ pub fn parse(xml_file: &str) -> anyhow::Result<ResultList> {
     for result in results.list.borrow().iter() {
         println!("{result:?}")
     }
-    dump_csv(&results)?;
+    dump_csv(csv_file, &results)?;
     Ok(results)
 }
 
-fn dump_csv(results: &ResultList) -> anyhow::Result<()> {
+fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
     //let mut wtr = csv::Writer::from_writer(io::stdout());
-    let mut wtr = csv::Writer::from_path("output.csv")?;
+    let mut wtr = csv::Writer::from_path(csv_file)?;
 
     wtr.write_record(&["Type", "Name", "Result"])?;
     for child in results.list.borrow().iter() {

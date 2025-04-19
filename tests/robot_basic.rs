@@ -9,8 +9,9 @@ use std::rc::Rc;
 fn test_parser_a() -> anyhow::Result<()> {
     common::run_rf_test("a")?;
     let filename = "robot/results/output_a.xml";
+    let csv_file = "robot/results/output_a.csv";
     let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
-    let results = blend_result::parse(&xml).context("Parsing failed")?;
+    let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
 
     let expect = ResultList {
         list: Rc::new(RefCell::new(vec![
@@ -58,7 +59,8 @@ fn test_parser_a() -> anyhow::Result<()> {
 fn test_parser_b() -> anyhow::Result<()> {
     common::run_rf_test("b")?;
     let filename = "robot/results/output_b.xml";
+    let csv_file = "robot/results/output_b.csv";
     let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
-    let results = blend_result::parse(&xml).context("Parsing failed")?;
+    let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
     Ok(())
 }
