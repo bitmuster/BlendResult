@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ElementType {
     Robot,
     Suite,
@@ -9,7 +9,7 @@ pub enum ElementType {
     Keyword,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ResultType {
     Pass,
     Fail,
@@ -29,6 +29,18 @@ impl PartialEq for Element {
     fn eq(&self, other: &Self) -> bool {
         self.et == other.et && self.children == other.children && self.result == other.result
     }
+}
+
+#[derive(Debug)]
+pub struct ElementFlat {
+    pub et: ElementType,
+    pub result: ResultType,
+    pub name: String,
+}
+
+#[derive(Debug)]
+pub struct ResultList {
+    pub list: Rc<RefCell<Vec<ElementFlat>>>,
 }
 
 #[cfg(test)]

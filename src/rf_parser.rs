@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use quick_xml::events::attributes;
 use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
@@ -7,9 +8,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::str;
-use anyhow::{Result,Context};
 
-use crate::element::{Element, ElementType, ResultType};
+use crate::element::{Element, ElementFlat, ElementType, ResultList, ResultType};
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -61,7 +61,11 @@ fn status_to_result(status: &str) -> ResultType {
     }
 }
 
-fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) -> anyhow::Result<()>{
+fn parse_inner(
+    reader: &mut Reader<&[u8]>,
+    element: &mut Element,
+    depth: usize,
+) -> anyhow::Result<()> {
     let mut buf = Vec::new();
 
     loop {
@@ -180,11 +184,11 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
             }
         }
         buf.clear();
-    };
+    }
     Ok(())
 }
 
-pub fn parse(xml_file: &str) -> anyhow::Result<()>{
+pub fn parse(xml_file: &str) -> anyhow::Result<ResultList> {
     let mut reader = Reader::from_str(xml_file);
     reader.config_mut().trim_text(true);
 
@@ -202,19 +206,36 @@ pub fn parse(xml_file: &str) -> anyhow::Result<()>{
     println!("Root {:#?}", root_element);
     //println!("{:?}", current);
 
-    dump_flat(&root_element);
-    Ok(())
+    let mut results = ResultList {
+        list: Rc::new(RefCell::new(Vec::new())),
+    };
+    dump_flat(&root_element, &mut results);
+
+    for result in results.list.borrow().iter() {
+        println!("{result:?}")
+    }
+    Ok(results)
 }
 
-fn dump_flat(element: &Element) {
+fn dump_flat(element: &Element, results: &mut ResultList) {
     println!("Flat Dump:");
     println!("{:?}; {}", element.et, element.name);
-    dump_flat_inner(element);
+    results.list.borrow_mut().push(ElementFlat {
+        et: element.et.clone(),
+        name: element.name.clone(),
+        result: element.result.clone(),
+    });
+    dump_flat_inner(element, results);
 }
 
-fn dump_flat_inner(element: &Element) {
+fn dump_flat_inner(element: &Element, results: &mut ResultList) {
     for child in element.children.borrow().iter() {
         println!("{:?}; {}; {:?}", child.et, child.name, child.result);
-        dump_flat_inner(child);
+        results.list.borrow_mut().push(ElementFlat {
+            et: element.et.clone(),
+            name: element.name.clone(),
+            result: element.result.clone(),
+        });
+        dump_flat_inner(child, results);
     }
 }
