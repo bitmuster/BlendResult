@@ -78,7 +78,6 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                 );
                 print_attributes(&ident, e.attributes());
                 let name = get_attr_name("name", e.attributes());
-                let status = get_attr_name("status", e.attributes());
                 match e.name().as_ref() {
                     b"robot" => (),
                     b"suite" => {
@@ -86,7 +85,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             et: ElementType::Suite,
                             children: RefCell::new(Vec::new()),
                             parent: RefCell::new(Weak::new()),
-                            result: status_to_result(&status),
+                            result: ResultType::None,
                             name,
                         };
                         parse_inner(reader, &mut suite_element, depth + 1);
@@ -100,7 +99,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             et: ElementType::Test,
                             children: RefCell::new(Vec::new()),
                             parent: RefCell::new(Weak::new()),
-                            result: status_to_result(&status),
+                            result: ResultType::None,
                             name,
                         };
                         parse_inner(reader, &mut test_element, depth + 1);
@@ -114,7 +113,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                             et: ElementType::Keyword,
                             children: RefCell::new(Vec::new()),
                             parent: RefCell::new(Weak::new()),
-                            result: status_to_result(&status),
+                            result: ResultType::None,
                             name,
                         };
                         parse_inner(reader, &mut kw_element, depth + 1);
@@ -160,6 +159,13 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
                 print_attributes(&ident, e.attributes());
+                match element.et {
+                    ElementType::Keyword | ElementType::Suite | ElementType::Test => {
+                        let status = get_attr_name("status", e.attributes());
+                        element.result = status_to_result(&status);
+                    }
+                    _ => (),
+                }
             }
             Ok(Event::Decl(e)) => {
                 println!("{ident}Decl {}", any::type_name_of_val(&e));
