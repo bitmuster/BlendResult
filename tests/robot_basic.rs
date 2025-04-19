@@ -49,11 +49,6 @@ fn test_stuff() -> anyhow::Result<()> {
                 result: ResultType::Pass,
                 name: String::from("No Operation"),
             },
-            ElementFlat {
-                et: ElementType::Suite,
-                result: ResultType::None,
-                name: String::from(""),
-            },
         ])),
     };
     assert_eq!(results, expect);

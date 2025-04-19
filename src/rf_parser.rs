@@ -129,7 +129,9 @@ fn parse_inner(
                     }
                     b"doc" => (),
                     b"arg" => (),
-                    b"statistics" => (),
+                    b"statistics" => {
+                        break
+                    },
                     b"total" => (),
                     b"errors" => (),
                     b"stat" => (),
