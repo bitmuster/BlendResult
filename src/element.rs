@@ -25,7 +25,7 @@ pub struct Element {
     pub name: String,
 }
 
-impl<'a> PartialEq for Element {
+impl PartialEq for Element {
     fn eq(&self, other: &Self) -> bool {
         self.et == other.et && self.children == other.children && self.result == other.result
     }

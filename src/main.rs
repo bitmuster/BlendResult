@@ -6,7 +6,7 @@ mod blend_result;
 mod element;
 
 fn main() -> Result<(), String> {
-    let filename = env::args().skip(1).next().unwrap();
+    let filename = env::args().nth(1).unwrap();
     println!("Analyzing {}", filename);
 
     let xml = fs::read_to_string(filename).unwrap();

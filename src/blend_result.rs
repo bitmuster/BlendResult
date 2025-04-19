@@ -177,7 +177,7 @@ fn parse_inner(reader: &mut Reader<&[u8]>, element: &mut Element, depth: usize) 
 }
 
 pub fn parse(xml_file: &str) {
-    let mut reader = Reader::from_str(&xml_file);
+    let mut reader = Reader::from_str(xml_file);
     reader.config_mut().trim_text(true);
 
     let depth = 0;
