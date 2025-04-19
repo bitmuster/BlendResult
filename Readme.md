@@ -1,4 +1,8 @@
 
+# Run
+
+    cargo run -- robot/results/output_a.xml
+    cargo test && cargo run -- robot/results/output_a.xml
 
 # Documentation
 
