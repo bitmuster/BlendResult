@@ -6,10 +6,10 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 #[test]
-fn test_stuff() -> anyhow::Result<()> {
-    common::run_rf_test_a();
+fn test_parser_a() -> anyhow::Result<()> {
+    common::run_rf_test("a")?;
     let filename = "robot/results/output_a.xml";
-    let xml = fs::read_to_string(filename).unwrap();
+    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
     let results = blend_result::parse(&xml).context("Parsing failed")?;
 
     let expect = ResultList {
@@ -52,5 +52,13 @@ fn test_stuff() -> anyhow::Result<()> {
         ])),
     };
     assert_eq!(results, expect);
+    Ok(())
+}
+#[test]
+fn test_parser_b() -> anyhow::Result<()> {
+    common::run_rf_test("b")?;
+    let filename = "robot/results/output_b.xml";
+    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
+    let results = blend_result::parse(&xml).context("Parsing failed")?;
     Ok(())
 }

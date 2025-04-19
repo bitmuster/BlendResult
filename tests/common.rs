@@ -1,19 +1,18 @@
+use anyhow::Context;
 use std::process;
 
-pub fn run_rf_test_a() {
+pub fn run_rf_test(t: &str) -> anyhow::Result<()> {
     let output = process::Command::new("sh")
         .arg("-c")
         .arg(
-            ". venv/bin/activate;
-            robot -d robot/results/ \
-            -o output_a.xml -l log_a.html -r report_a.html\
-            robot/test_a.robot
-            ",
+            format!(
+            ". venv/bin/activate; robot -d robot/results/ -o output_{t}.xml -l log_{t}.html -r report_{t}.html robot/test_{t}.robot")
         )
         .output()
-        .expect("failed to execute process");
+        .context("failed to execute process")?;
     println!(
         "Robot Outputs:\n{}",
-        String::from_utf8(output.stdout).unwrap()
+        String::from_utf8(output.stdout).context("Utf8 conversion failed")?
     );
+    Ok(())
 }
