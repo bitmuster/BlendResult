@@ -4,6 +4,7 @@ use quick_xml::events::Event;
 use quick_xml::reader::Reader;
 use std::any;
 use std::cell::RefCell;
+use std::io;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::str;
@@ -213,7 +214,25 @@ pub fn parse(xml_file: &str) -> anyhow::Result<ResultList> {
     for result in results.list.borrow().iter() {
         println!("{result:?}")
     }
+    dump_csv(&results)?;
     Ok(results)
+}
+
+fn dump_csv(results: &ResultList) -> anyhow::Result<()> {
+    //let mut wtr = csv::Writer::from_writer(io::stdout());
+    let mut wtr = csv::Writer::from_path("output.csv")?;
+
+    wtr.write_record(&["Type", "Name", "Result"])?;
+    for child in results.list.borrow().iter() {
+        wtr.write_record(&[
+            format!("{:?}", child.et),
+            format!("{}", child.name),
+            format!("{:?}", child.result),
+        ])?;
+    }
+
+    wtr.flush()?;
+    Ok(())
 }
 
 fn dump_flat(element: &Element, results: &mut ResultList) {
