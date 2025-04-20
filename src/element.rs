@@ -13,6 +13,7 @@ pub enum ElementType {
     For,
     Iter,
     While,
+    Continue,
 }
 
 #[derive(Debug, PartialEq, Clone)]

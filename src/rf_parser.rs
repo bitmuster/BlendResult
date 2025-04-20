@@ -64,8 +64,8 @@ fn status_to_result(status: &str) -> ResultType {
     }
 }
 
-struct ParserStats{
-    max_depth : usize,
+struct ParserStats {
+    max_depth: usize,
 }
 
 /// Slightly cursed parser for output.xml files
@@ -107,6 +107,7 @@ fn parse_inner(
                     b"for" => et = Some(ElementType::For),
                     b"iter" => et = Some(ElementType::Iter),
                     b"while" => et = Some(ElementType::While),
+                    b"continue" => et = Some(ElementType::Continue),
                     b"doc" => (),
                     b"arg" => (),
                     b"statistics" => break,
@@ -120,6 +121,8 @@ fn parse_inner(
                     b"value" => (),
                     b"break" => (),
                     b"status" => (),
+                    // At least in one example a "pattern" appeared here instead of at End
+                    b"pattern" => break,
                     s => {
                         warn!("Unmatched {:?}", str::from_utf8(s).unwrap());
                         panic!()
@@ -148,6 +151,8 @@ fn parse_inner(
                 debug!("{ident}    Text: {} ...", text.get(0..len).unwrap());
             }
             Ok(Event::End(e)) => {
+                // End means elements that end without having sub elements
+
                 // println!("  End {}", any::type_name_of_val(&e));
                 let ident = " ".repeat(depth * 4 + 4);
                 debug!(
@@ -166,6 +171,7 @@ fn parse_inner(
                     b"for" => break,
                     b"iter" => break,
                     b"while" => break,
+                    b"pattern" => break,
                     _ => (),
                 }
             }
@@ -220,7 +226,7 @@ pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
         result: ResultType::None,
         name: String::new(),
     };
-    let mut stats = ParserStats{max_depth:0};
+    let mut stats = ParserStats { max_depth: 0 };
 
     parse_inner(&mut reader, &mut root_element, depth, &mut stats)?;
 
