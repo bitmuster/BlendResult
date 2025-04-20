@@ -7,6 +7,12 @@ pub enum ElementType {
     Suite,
     Test,
     Keyword,
+    If,
+    Branch,
+    Try,
+    For,
+    Iter,
+    While,
 }
 
 #[derive(Debug, PartialEq, Clone)]

@@ -61,6 +61,7 @@ fn status_to_result(status: &str) -> ResultType {
     }
 }
 
+/// Slightly cursed parser for output.xml files
 fn parse_inner(
     reader: &mut Reader<&[u8]>,
     element: &mut Element,
@@ -83,50 +84,36 @@ fn parse_inner(
                 );
                 print_attributes(&ident, e.attributes());
                 let name = get_attr_name("name", e.attributes());
+                let mut et : Option<ElementType> = None;
                 match e.name().as_ref() {
                     b"robot" => (),
                     b"suite" => {
-                        let mut suite_element = Element {
-                            et: ElementType::Suite,
-                            children: RefCell::new(Vec::new()),
-                            parent: RefCell::new(Weak::new()),
-                            result: ResultType::None,
-                            name,
-                        };
-                        parse_inner(reader, &mut suite_element, depth + 1)?;
-                        let mut parent = element.parent.borrow_mut();
-                        let rc_suite_element = Rc::new(suite_element);
-                        *parent = Rc::downgrade(&rc_suite_element);
-                        element.children.borrow_mut().push(rc_suite_element);
-                    }
+                        et = Some(ElementType::Suite)
+                    },
                     b"test" => {
-                        let mut test_element = Element {
-                            et: ElementType::Test,
-                            children: RefCell::new(Vec::new()),
-                            parent: RefCell::new(Weak::new()),
-                            result: ResultType::None,
-                            name,
-                        };
-                        parse_inner(reader, &mut test_element, depth + 1)?;
-                        let mut parent = element.parent.borrow_mut();
-                        let rc_element = Rc::new(test_element);
-                        *parent = Rc::downgrade(&rc_element);
-                        element.children.borrow_mut().push(rc_element);
-                    }
+                        et = Some(ElementType::Test)
+                    },
                     b"kw" => {
-                        let mut kw_element = Element {
-                            et: ElementType::Keyword,
-                            children: RefCell::new(Vec::new()),
-                            parent: RefCell::new(Weak::new()),
-                            result: ResultType::None,
-                            name,
-                        };
-                        parse_inner(reader, &mut kw_element, depth + 1)?;
-                        let mut parent = element.parent.borrow_mut();
-                        let rc_element = Rc::new(kw_element);
-                        *parent = Rc::downgrade(&rc_element);
-                        element.children.borrow_mut().push(rc_element);
-                    }
+                        et = Some(ElementType::Keyword)
+                    },
+                    b"if" => {
+                        et = Some(ElementType::If)
+                    },
+                    b"branch" => {
+                        et = Some(ElementType::Branch)
+                    },
+                    b"try" => {
+                        et = Some(ElementType::Try)
+                    },
+                    b"for" => {
+                        et = Some(ElementType::For)
+                    },
+                    b"iter" => {
+                        et = Some(ElementType::Iter)
+                    },
+                    b"while" => {
+                        et = Some(ElementType::While)
+                    },
                     b"doc" => (),
                     b"arg" => (),
                     b"statistics" => break,
@@ -134,12 +121,38 @@ fn parse_inner(
                     b"errors" => (),
                     b"stat" => (),
                     b"tag" => (),
-                    s => println!("Unmatched {:?}", str::from_utf8(s).unwrap()),
+                    b"msg" => (),
+                    b"var" => (),
+                    b"return" => (),
+                    b"value" => (),
+                    b"break" => (),
+                    b"status" => (),
+                    s => {
+                        println!("Unmatched {:?}", str::from_utf8(s).unwrap());
+                        panic!()
+                        }
+                    }
+
+                if let Some(e) = et {
+                    let mut suite_element = Element {
+                            et: e,
+                            children: RefCell::new(Vec::new()),
+                            parent: RefCell::new(Weak::new()),
+                            result: ResultType::None,
+                            name,
+                        };
+                    parse_inner(reader, &mut suite_element, depth + 1)?;
+                    let mut parent = element.parent.borrow_mut();
+                    let rc_suite_element = Rc::new(suite_element);
+                    *parent = Rc::downgrade(&rc_suite_element);
+                    element.children.borrow_mut().push(rc_suite_element);
                 }
             }
             Ok(Event::Text(e)) => {
                 //println!("{ident}Text {}", any::type_name_of_val(&e));
-                println!("{ident}    Text: {}", e.unescape().unwrap());
+                let text : &str = &e.unescape().unwrap();
+                let len = usize::min(text.len(),20);
+                println!("{ident}    Text: {}", text.get(0..len).unwrap());
             }
             Ok(Event::End(e)) => {
                 //println!("  End {}", any::type_name_of_val(&e));
@@ -154,6 +167,12 @@ fn parse_inner(
                     b"suite" => break,
                     b"test" => break,
                     b"kw" => break,
+                    b"branch" => break,
+                    b"if" => break,
+                    b"try" => break,
+                    b"for" => break,
+                    b"iter" => break,
+                    b"while" => break,
                     _ => (),
                 }
             }
@@ -203,17 +222,17 @@ pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
 
     parse_inner(&mut reader, &mut root_element, depth)?;
 
-    println!("Root {:#?}", root_element);
-    //println!("{:?}", current);
+    // println!("Root {:#?}", root_element);
+    // println!("{:?}", current);
 
     let mut results = ResultList {
         list: Rc::new(RefCell::new(Vec::new())),
     };
     dump_flat(&root_element, &mut results);
-
+    /*
     for result in results.list.borrow().iter() {
         println!("{result:?}")
-    }
+    }*/
     dump_csv(csv_file, &results)?;
     Ok(results)
 }
@@ -237,7 +256,7 @@ fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
 
 fn dump_flat(element: &Element, results: &mut ResultList) {
     println!("Flat Dump:");
-    println!("{:?}; {}", element.et, element.name);
+    //println!("{:?}; {}", element.et, element.name);
     results.list.borrow_mut().push(ElementFlat {
         et: element.et.clone(),
         name: element.name.clone(),
