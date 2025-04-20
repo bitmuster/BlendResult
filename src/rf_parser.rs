@@ -1,3 +1,4 @@
+use csv::Writer;
 use log::{debug, info, trace, warn};
 use quick_xml::events::attributes;
 use quick_xml::events::attributes::AttrError;
@@ -247,6 +248,37 @@ pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     Ok(results)
 }
 
+pub fn parse_from_str_to_str(xml_file: &str) -> anyhow::Result<String> {
+    let mut reader = Reader::from_str(xml_file);
+    reader.config_mut().trim_text(true);
+
+    let depth = 0;
+    let mut root_element: Element = Element {
+        et: ElementType::Robot,
+        children: RefCell::new(Vec::new()),
+        parent: RefCell::new(Weak::new()),
+        result: ResultType::None,
+        name: String::new(),
+    };
+    let mut stats = ParserStats { max_depth: 0 };
+
+    parse_inner(&mut reader, &mut root_element, depth, &mut stats)?;
+
+    // println!("Root {:#?}", root_element);
+    // println!("{:?}", current);
+
+    let mut results = ResultList {
+        list: Rc::new(RefCell::new(Vec::new())),
+    };
+    dump_flat(&root_element, &mut results);
+    /*
+    for result in results.list.borrow().iter() {
+        println!("{result:?}")
+    }*/
+
+    Ok(dump_csv_to_str(&results)?)
+}
+
 fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
     //let mut wtr = csv::Writer::from_writer(io::stdout());
     let mut wtr = csv::Writer::from_path(csv_file)?;
@@ -262,6 +294,21 @@ fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
 
     wtr.flush()?;
     Ok(())
+}
+
+fn dump_csv_to_str(results: &ResultList) -> anyhow::Result<String> {
+    let mut wtr = Writer::from_writer(vec![]);
+    wtr.write_record(&["Type", "Name", "Result"])?;
+    for child in results.list.borrow().iter() {
+        wtr.write_record(&[
+            format!("{:?}", child.et),
+            format!("{}", child.name),
+            format!("{:?}", child.result),
+        ])?;
+    }
+
+    wtr.flush()?;
+    Ok(String::from_utf8(wtr.into_inner()?)?)
 }
 
 fn dump_flat(element: &Element, results: &mut ResultList) {

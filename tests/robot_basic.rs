@@ -64,3 +64,36 @@ fn test_parser_b() -> anyhow::Result<()> {
     let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
     Ok(())
 }
+#[test]
+fn test_parse_from_str_to_str() -> anyhow::Result<()> {
+    common::run_rf_test("b")?;
+    let filename = "robot/results/output_b.xml";
+    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
+    let results = blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
+
+    let expect = "Type,Name,Result\n\
+        Robot,,None\n\
+        Suite,Test B,Pass\n\
+        Test,Demo Test A,Pass\n\
+        Keyword,Keyword A,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Test,Demo Test B,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,Keyword B,Pass\n\
+        Keyword,Keyword A,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Test,Demo Test C,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,Keyword C,Pass\n\
+        Keyword,Keyword B,Pass\n\
+        Keyword,Keyword A,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Test,Demo Test D,Pass\n\
+        Keyword,Log To Console,Pass\n";
+
+    assert_eq!(results, expect);
+    Ok(())
+}
