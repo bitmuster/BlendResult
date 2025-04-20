@@ -1,3 +1,4 @@
+use log::{debug, info, trace, warn};
 use quick_xml::events::attributes;
 use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
@@ -34,7 +35,7 @@ fn print_attributes(ident: &str, attr: attributes::Attributes) {
     for a in attr {
         let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
         let value = a.unwrap().unescape_value().unwrap();
-        println!("{ident}    Attr: {:?} {:?}", key, value);
+        debug!("{ident}    Attr: {:?} {:?}", key, value);
     }
 }
 
@@ -80,7 +81,7 @@ fn parse_inner(
 
             Ok(Event::Start(e)) => {
                 //println!("  Start {}", any::type_name_of_val(&e));
-                println!(
+                debug!(
                     "{ident}Start: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
@@ -112,7 +113,7 @@ fn parse_inner(
                     b"break" => (),
                     b"status" => (),
                     s => {
-                        println!("Unmatched {:?}", str::from_utf8(s).unwrap());
+                        warn!("Unmatched {:?}", str::from_utf8(s).unwrap());
                         panic!()
                     }
                 }
@@ -136,12 +137,12 @@ fn parse_inner(
                 //println!("{ident}Text {}", any::type_name_of_val(&e));
                 let text: &str = &e.unescape().unwrap();
                 let len = usize::min(text.len(), 30);
-                println!("{ident}    Text: {} ...", text.get(0..len).unwrap());
+                debug!("{ident}    Text: {} ...", text.get(0..len).unwrap());
             }
             Ok(Event::End(e)) => {
                 // println!("  End {}", any::type_name_of_val(&e));
                 let ident = " ".repeat(depth * 4 + 4);
-                println!(
+                debug!(
                     "{ident}End: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
@@ -162,7 +163,7 @@ fn parse_inner(
             }
             Ok(Event::Empty(e)) => {
                 //println!("{ident}Empty {}", any::type_name_of_val(&e));
-                println!(
+                debug!(
                     "{ident}Empty: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
@@ -184,14 +185,14 @@ fn parse_inner(
                 }
             }
             Ok(Event::Decl(e)) => {
-                println!("{ident}Decl {}", any::type_name_of_val(&e));
+                debug!("{ident}Decl {}", any::type_name_of_val(&e));
             }
 
             /*            Ok(x) => {
                 println!("Ok {:?}", any::type_name_of_val(&x));
             }*/
             x => {
-                println!("No Type {:?}", any::type_name_of_val(&x));
+                warn!("No Type {:?}", any::type_name_of_val(&x));
             }
         }
         buf.clear();
@@ -248,7 +249,7 @@ fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
 }
 
 fn dump_flat(element: &Element, results: &mut ResultList) {
-    println!("Flat Dump:");
+    debug!("Flat Dump:");
     //println!("{:?}; {}", element.et, element.name);
     results.list.borrow_mut().push(ElementFlat {
         et: element.et.clone(),
@@ -260,7 +261,7 @@ fn dump_flat(element: &Element, results: &mut ResultList) {
 
 fn dump_flat_inner(element: &Element, results: &mut ResultList) {
     for child in element.children.borrow().iter() {
-        println!("{:?}; {}; {:?}", child.et, child.name, child.result);
+        debug!("{:?}; {}; {:?}", child.et, child.name, child.result);
         results.list.borrow_mut().push(ElementFlat {
             et: child.et.clone(),
             name: child.name.clone(),

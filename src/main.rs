@@ -5,6 +5,8 @@ mod element;
 mod rf_parser;
 
 fn main() -> anyhow::Result<()> {
+    simple_logger::SimpleLogger::new().env().init().unwrap();
+
     let filename = env::args()
         .nth(1)
         .context("Wrong amount of command line parameters")?;
