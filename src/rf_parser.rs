@@ -64,14 +64,22 @@ fn status_to_result(status: &str) -> ResultType {
     }
 }
 
+struct ParserStats{
+    max_depth : usize,
+}
+
 /// Slightly cursed parser for output.xml files
 fn parse_inner(
     reader: &mut Reader<&[u8]>,
     element: &mut Element,
     depth: usize,
+    stats: &mut ParserStats,
 ) -> anyhow::Result<()> {
     let mut buf = Vec::new();
 
+    if depth > stats.max_depth {
+        stats.max_depth = depth;
+    }
     loop {
         let ident = " ".repeat(depth * 4 + 4);
         match reader.read_event_into(&mut buf) {
@@ -126,7 +134,7 @@ fn parse_inner(
                         result: ResultType::None,
                         name,
                     };
-                    parse_inner(reader, &mut suite_element, depth + 1)?;
+                    parse_inner(reader, &mut suite_element, depth + 1, stats)?;
                     let mut parent = element.parent.borrow_mut();
                     let rc_suite_element = Rc::new(suite_element);
                     *parent = Rc::downgrade(&rc_suite_element);
@@ -212,8 +220,9 @@ pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
         result: ResultType::None,
         name: String::new(),
     };
+    let mut stats = ParserStats{max_depth:0};
 
-    parse_inner(&mut reader, &mut root_element, depth)?;
+    parse_inner(&mut reader, &mut root_element, depth, &mut stats)?;
 
     // println!("Root {:#?}", root_element);
     // println!("{:?}", current);
@@ -228,6 +237,7 @@ pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     }*/
     dump_csv(csv_file, &results)?;
     println!("Parsed {} elements", results.list.borrow().len());
+    println!("Maximum tree depth {}", stats.max_depth);
     Ok(results)
 }
 
