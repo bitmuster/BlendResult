@@ -11,3 +11,6 @@ https://docs.rs/quick-xml/0.37.4/quick_xml/
 https://github.com/tafia/quick-xml
 
 https://crates.io/crates/clap
+
+
+https://github.com/robotframework/robotframework/blob/master/doc/schema/result.xsd

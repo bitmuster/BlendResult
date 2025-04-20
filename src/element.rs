@@ -19,6 +19,7 @@ pub enum ElementType {
 pub enum ResultType {
     Pass,
     Fail,
+    NotRun,
     None,
 }
 

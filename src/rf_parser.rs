@@ -47,15 +47,17 @@ fn get_attr_name<'a>(name: &'a str, attr: attributes::Attributes<'a>) -> String 
         }
     }
     "".to_string()
+    //panic!("Cannot get attr {name}");
 }
 
 fn status_to_result(status: &str) -> ResultType {
     match status {
         "PASS" => ResultType::Pass,
         "FAIL" => ResultType::Fail,
+        "NOT RUN" => ResultType::NotRun,
         s => {
-            //panic!("Panic:  {s}");
-            println!("Panic:  {s}");
+            panic!("Panic:  \"{s}\"");
+            println!("Panic:  \"{s}\"");
             ResultType::None
         }
     }
@@ -84,36 +86,18 @@ fn parse_inner(
                 );
                 print_attributes(&ident, e.attributes());
                 let name = get_attr_name("name", e.attributes());
-                let mut et : Option<ElementType> = None;
+                let mut et: Option<ElementType> = None;
                 match e.name().as_ref() {
                     b"robot" => (),
-                    b"suite" => {
-                        et = Some(ElementType::Suite)
-                    },
-                    b"test" => {
-                        et = Some(ElementType::Test)
-                    },
-                    b"kw" => {
-                        et = Some(ElementType::Keyword)
-                    },
-                    b"if" => {
-                        et = Some(ElementType::If)
-                    },
-                    b"branch" => {
-                        et = Some(ElementType::Branch)
-                    },
-                    b"try" => {
-                        et = Some(ElementType::Try)
-                    },
-                    b"for" => {
-                        et = Some(ElementType::For)
-                    },
-                    b"iter" => {
-                        et = Some(ElementType::Iter)
-                    },
-                    b"while" => {
-                        et = Some(ElementType::While)
-                    },
+                    b"suite" => et = Some(ElementType::Suite),
+                    b"test" => et = Some(ElementType::Test),
+                    b"kw" => et = Some(ElementType::Keyword),
+                    b"if" => et = Some(ElementType::If),
+                    b"branch" => et = Some(ElementType::Branch),
+                    b"try" => et = Some(ElementType::Try),
+                    b"for" => et = Some(ElementType::For),
+                    b"iter" => et = Some(ElementType::Iter),
+                    b"while" => et = Some(ElementType::While),
                     b"doc" => (),
                     b"arg" => (),
                     b"statistics" => break,
@@ -130,17 +114,17 @@ fn parse_inner(
                     s => {
                         println!("Unmatched {:?}", str::from_utf8(s).unwrap());
                         panic!()
-                        }
                     }
+                }
 
                 if let Some(e) = et {
                     let mut suite_element = Element {
-                            et: e,
-                            children: RefCell::new(Vec::new()),
-                            parent: RefCell::new(Weak::new()),
-                            result: ResultType::None,
-                            name,
-                        };
+                        et: e,
+                        children: RefCell::new(Vec::new()),
+                        parent: RefCell::new(Weak::new()),
+                        result: ResultType::None,
+                        name,
+                    };
                     parse_inner(reader, &mut suite_element, depth + 1)?;
                     let mut parent = element.parent.borrow_mut();
                     let rc_suite_element = Rc::new(suite_element);
@@ -150,12 +134,12 @@ fn parse_inner(
             }
             Ok(Event::Text(e)) => {
                 //println!("{ident}Text {}", any::type_name_of_val(&e));
-                let text : &str = &e.unescape().unwrap();
-                let len = usize::min(text.len(),20);
-                println!("{ident}    Text: {}", text.get(0..len).unwrap());
+                let text: &str = &e.unescape().unwrap();
+                let len = usize::min(text.len(), 30);
+                println!("{ident}    Text: {} ...", text.get(0..len).unwrap());
             }
             Ok(Event::End(e)) => {
-                //println!("  End {}", any::type_name_of_val(&e));
+                // println!("  End {}", any::type_name_of_val(&e));
                 let ident = " ".repeat(depth * 4 + 4);
                 println!(
                     "{ident}End: {}",
@@ -182,6 +166,14 @@ fn parse_inner(
                     "{ident}Empty: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
+
+                match e.name().as_ref() {
+                    b"timeout" => continue,
+                    b"status" => (),
+                    b"var" => (),
+                    s => panic!("Cannot parse {}", str::from_utf8(s).unwrap()),
+                }
+
                 print_attributes(&ident, e.attributes());
                 match element.et {
                     ElementType::Keyword | ElementType::Suite | ElementType::Test => {
@@ -234,6 +226,7 @@ pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
         println!("{result:?}")
     }*/
     dump_csv(csv_file, &results)?;
+    println!("Parsed {} elements", results.list.borrow().len());
     Ok(results)
 }
 
