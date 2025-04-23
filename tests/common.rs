@@ -21,11 +21,10 @@ pub fn run_rf_test(t: &str) -> anyhow::Result<()> {
         .output()
         .context("Failed to execute process: robotframework")?;
     if !output.status.success() {
-        println!(
-            "Robot Error:\n{:?}",
+        return Err(anyhow!(
+            "Call on shell failed: {:?}",
             String::from_utf8(output.stderr).context("Utf8 conversion failed")?
-        );
-        return Err(anyhow!(String::from("Something")));
+        ));
     };
 
     println!(
