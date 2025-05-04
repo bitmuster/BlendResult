@@ -10,8 +10,10 @@ calls and csv files.
 
 # Run
 
-    cargo run -- robot/results/output_a.xml
-    cargo test && cargo run -- robot/results/output_a.xml
+    cargo run  -- robot/results/output_a.xml output.csv
+    cargo test && cargo run  -- robot/results/output_a.xml output.csv
+    cargo test test_parser_c -- --show-output
+    RUST_LOG=trace cargo test test_parser_c -- --show-output
 
 # Documentation
 
