@@ -268,7 +268,7 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
             // println!("{result:?}")
         }
         let csv_str = dump_csv_to_str(&result)?;
-        println!("{csv_str}");
+        debug!("{csv_str}");
     }
 
     let result = ResultList {
@@ -277,8 +277,8 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
     Ok(result)
 }
 
-pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
-    let mut reader = Reader::from_str(xml_file);
+pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
+    let mut reader = Reader::from_str(xml_data);
     reader.config_mut().trim_text(true);
 
     let depth = 0;
@@ -310,8 +310,8 @@ pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     Ok(results)
 }
 
-pub fn parse_from_str_to_str(xml_file: &str) -> anyhow::Result<String> {
-    let mut reader = Reader::from_str(xml_file);
+pub fn parse_from_str_to_str(xml_data: &str) -> anyhow::Result<String> {
+    let mut reader = Reader::from_str(xml_data);
     reader.config_mut().trim_text(true);
 
     let depth = 0;
