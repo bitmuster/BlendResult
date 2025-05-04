@@ -97,3 +97,17 @@ fn test_parse_from_str_to_str() -> anyhow::Result<()> {
     assert_eq!(results, expect);
     Ok(())
 }
+#[test]
+fn test_parser_c() -> anyhow::Result<()> {
+    common::run_rf_test_with_options("c", false, "_fail", "--variable failhere:False")?;
+    common::run_rf_test_with_options("c", true, "_pass", "--variable failhere:True")?;
+    let filename = "robot/results/output_c_pass.xml";
+    let csv_file = "robot/results/output_c_pass.csv";
+    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
+    let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
+    let filename = "robot/results/output_c_fail.xml";
+    let csv_file = "robot/results/output_c_fail.csv";
+    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
+    let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
+    Ok(())
+}
