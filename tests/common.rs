@@ -2,6 +2,11 @@ use anyhow::anyhow;
 use anyhow::Context;
 use std::process;
 
+pub fn init_logger() {
+    // Ignore result when logger is already initialised
+    let _ = simple_logger::SimpleLogger::new().env().init();
+}
+
 pub fn run_rf_test(t: &str) -> anyhow::Result<()> {
     run_rf_test_with_options(t, true, "", "")
 }

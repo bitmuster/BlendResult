@@ -8,6 +8,7 @@ use std::rc::Rc;
 
 #[test]
 fn test_parser_a() -> anyhow::Result<()> {
+    common::init_logger();
     common::run_rf_test("a")?;
     let filename = "robot/results/output_a.xml";
     let csv_file = "robot/results/output_a.csv";
@@ -58,6 +59,7 @@ fn test_parser_a() -> anyhow::Result<()> {
 }
 #[test]
 fn test_parser_b() -> anyhow::Result<()> {
+    common::init_logger();
     common::run_rf_test("b")?;
     let filename = "robot/results/output_b.xml";
     let csv_file = "robot/results/output_b.csv";
@@ -67,6 +69,7 @@ fn test_parser_b() -> anyhow::Result<()> {
 }
 #[test]
 fn test_parse_from_str_to_str() -> anyhow::Result<()> {
+    common::init_logger();
     common::run_rf_test("b")?;
     let filename = "robot/results/output_b.xml";
     let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
@@ -100,6 +103,7 @@ fn test_parse_from_str_to_str() -> anyhow::Result<()> {
 }
 #[test]
 fn test_parser_c() -> anyhow::Result<()> {
+    common::init_logger();
     common::run_rf_test_with_options("c", false, "_fail", "--variable failhere:False")?;
     common::run_rf_test_with_options("c", true, "_pass", "--variable failhere:True")?;
     let filename = "robot/results/output_c_pass.xml";
@@ -113,6 +117,6 @@ fn test_parser_c() -> anyhow::Result<()> {
 
     let csv_file_blend = "robot/results/output_c_blednd.csv";
     let files = vec![filename, filename2];
-    blend(&files, csv_file_blend);
+    let _ = blend(&files, csv_file_blend);
     Ok(())
 }
