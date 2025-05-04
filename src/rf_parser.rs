@@ -1,3 +1,4 @@
+use anyhow::Context;
 use csv::Writer;
 use log::{debug, info, trace, warn};
 use quick_xml::events::attributes;
@@ -6,6 +7,7 @@ use quick_xml::events::Event;
 use quick_xml::reader::Reader;
 use std::any;
 use std::cell::RefCell;
+use std::fs;
 use std::io;
 use std::iter::zip;
 use std::rc::Rc;
@@ -87,10 +89,13 @@ fn parse_inner(
         match reader.read_event_into(&mut buf) {
             Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
 
-            Ok(Event::Eof) => break,
+            Ok(Event::Eof) => {
+                // println!("EOF");
+                break;
+            }
 
             Ok(Event::Start(e)) => {
-                //println!("  Start {}", any::type_name_of_val(&e));
+                // println!("  Start {}", any::type_name_of_val(&e));
                 debug!(
                     "{ident}Start: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
@@ -178,7 +183,7 @@ fn parse_inner(
                 }
             }
             Ok(Event::Empty(e)) => {
-                //println!("{ident}Empty {}", any::type_name_of_val(&e));
+                // println!("{ident}Empty {}", any::type_name_of_val(&e));
                 debug!(
                     "{ident}Empty: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
@@ -211,6 +216,7 @@ fn parse_inner(
                 warn!("No Type {:?}", any::type_name_of_val(&x));
             }
         }
+        //println!("{:?}", str::from_utf8(&buf));
         buf.clear();
     }
     Ok(())
@@ -223,7 +229,10 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
 
     for xml_file in xml_files {
         println!("Parsing {}", xml_file);
-        let mut reader = Reader::from_str(xml_file);
+        let xml_data =
+            fs::read_to_string(xml_file).context(format!("File not found {}", xml_file))?;
+
+        let mut reader = Reader::from_str(&xml_data);
         reader.config_mut().trim_text(true);
 
         let depth = 0;
@@ -256,7 +265,7 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
 
     for result in results {
         for robot_result in result.list.borrow().iter() {
-            println!("{result:?}")
+            // println!("{result:?}")
         }
     }
 
