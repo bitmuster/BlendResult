@@ -1,6 +1,7 @@
 use std::fs;
 mod common;
 use anyhow::{self, Context};
+use blend_result::blend;
 use blend_result::element::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -105,9 +106,13 @@ fn test_parser_c() -> anyhow::Result<()> {
     let csv_file = "robot/results/output_c_pass.csv";
     let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
     let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
-    let filename = "robot/results/output_c_fail.xml";
+    let filename2 = "robot/results/output_c_fail.xml";
     let csv_file = "robot/results/output_c_fail.csv";
-    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
+    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename2))?;
     let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
+
+    let csv_file_blend = "robot/results/output_c_blednd.csv";
+    let files = vec![filename, filename2];
+    blend(&files, csv_file_blend);
     Ok(())
 }

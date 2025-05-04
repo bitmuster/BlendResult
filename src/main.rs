@@ -10,11 +10,15 @@ fn main() -> anyhow::Result<()> {
     let filename = env::args()
         .nth(1)
         .context("Wrong amount of command line parameters")?;
-    let csv_file = env::args()
+    let filename2 = env::args()
         .nth(2)
+        .context("Wrong amount of command line parameters")?;
+    let csv_file = env::args()
+        .nth(3)
         .context("Wrong amount of command line parameters")?;
     println!("Analyzing {}", filename);
     let xml = fs::read_to_string(filename).context("Reading failed")?;
+    let xml2 = fs::read_to_string(filename2).context("Reading failed")?;
     rf_parser::parse(&xml, &csv_file)?;
     Ok(())
 }

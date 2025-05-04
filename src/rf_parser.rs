@@ -215,6 +215,46 @@ fn parse_inner(
     Ok(())
 }
 
+pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
+    let mut trees: Vec<Element> = Vec::new();
+
+    for xml_file in xml_files {
+        let mut reader = Reader::from_str(xml_file);
+        reader.config_mut().trim_text(true);
+
+        let depth = 0;
+        let mut root_element: Element = Element {
+            et: ElementType::Robot,
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
+            result: ResultType::None,
+            name: String::new(),
+        };
+        let mut stats = ParserStats { max_depth: 0 };
+
+        parse_inner(&mut reader, &mut root_element, depth, &mut stats)?;
+        trees.push(root_element);
+    }
+
+    // println!("Root {:#?}", root_element);
+    // println!("{:?}", current);
+
+    let mut results = ResultList {
+        list: Rc::new(RefCell::new(Vec::new())),
+    };
+    /*
+    dump_flat(&root_element, &mut results);
+    /*
+    for result in results.list.borrow().iter() {
+        println!("{result:?}")
+    }*/
+    dump_csv(csv_file, &results)?;
+    println!("Parsed {} elements", results.list.borrow().len());
+    println!("Maximum tree depth {}", stats.max_depth);
+    */
+    Ok(results)
+}
+
 pub fn parse(xml_file: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     let mut reader = Reader::from_str(xml_file);
     reader.config_mut().trim_text(true);
