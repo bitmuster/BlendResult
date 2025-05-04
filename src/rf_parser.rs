@@ -135,6 +135,11 @@ fn parse_inner(
                         panic!()
                     }
                 }
+                if e.name().as_ref() == b"status" {
+                    let status = get_attr_name("status", e.attributes());
+                    debug!("{ident}Got status from Start Element {:?}", status);
+                    element.result = status_to_result(&status);
+                }
 
                 if let Some(e) = et {
                     let mut suite_element = Element {
@@ -182,6 +187,7 @@ fn parse_inner(
                     _ => (),
                 }
             }
+            /// Empty means that the element has no subelements, only attributes
             Ok(Event::Empty(e)) => {
                 // println!("{ident}Empty {}", any::type_name_of_val(&e));
                 debug!(
@@ -200,6 +206,7 @@ fn parse_inner(
                 match element.et {
                     ElementType::Keyword | ElementType::Suite | ElementType::Test => {
                         let status = get_attr_name("status", e.attributes());
+                        debug!("{ident}Got status from Empty element {:?}", status);
                         element.result = status_to_result(&status);
                     }
                     _ => (),

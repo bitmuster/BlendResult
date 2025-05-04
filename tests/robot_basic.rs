@@ -102,6 +102,64 @@ fn test_parse_from_str_to_str() -> anyhow::Result<()> {
     Ok(())
 }
 #[test]
+fn test_parse_from_str_to_str_c() -> anyhow::Result<()> {
+    common::init_logger();
+    common::run_rf_test_with_options("c", true, "_fail", "--variable failhere:True")?;
+    let filename = "robot/results/output_c_fail.xml";
+    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
+    let results = blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
+
+    let expect = "Type,Name,Result\n\
+        Robot,,None\n\
+        Suite,Test C,Fail\n\
+        Test,Demo Test A,Pass\n\
+        Keyword,Keyword A,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Test,Demo Test B,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,Keyword B,Pass\n\
+        Keyword,Keyword A,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Test,Demo Test C,Fail\n\
+        Keyword,No Operation,Pass\n\
+        If,,Fail\n\
+        Branch,,Fail\n\
+        Keyword,Keyword C,Pass\n\
+        Keyword,Keyword B,Pass\n\
+        Keyword,Keyword A,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,Fail,Fail\n\
+        Branch,,None\n\
+        Keyword,No Operation,NotRun\n\
+        Test,Demo Test D,Pass\n\
+        Keyword,Log To Console,Pass\n";
+
+    assert_eq!(results, expect);
+    Ok(())
+}
+#[test]
+fn test_parse_from_str_to_str_d() -> anyhow::Result<()> {
+    common::init_logger();
+    common::run_rf_test_with_options("d", true, "_fail", "--variable failhere:True")?;
+    let filename = "robot/results/output_d_fail.xml";
+    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
+    let results = blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
+
+    let expect = "Type,Name,Result\n\
+        Robot,,None\n\
+        Suite,Test D,Fail\n\
+        Test,Demo Test D,Fail\n\
+        Keyword,No Operation,Pass\n\
+        Keyword,Fail,Fail\n\
+        Keyword,No Operation,NotRun\n";
+
+    assert_eq!(results, expect);
+    Ok(())
+}
+#[test]
 fn test_parser_c() -> anyhow::Result<()> {
     common::init_logger();
     common::run_rf_test_with_options("c", false, "_pass", "--variable failhere:False")?;
