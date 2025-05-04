@@ -267,6 +267,8 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
         for robot_result in result.list.borrow().iter() {
             // println!("{result:?}")
         }
+        let csv_str = dump_csv_to_str(&result)?;
+        println!("{csv_str}");
     }
 
     let result = ResultList {
