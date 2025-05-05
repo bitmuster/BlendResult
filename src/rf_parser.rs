@@ -229,6 +229,24 @@ fn parse_inner(
     Ok(())
 }
 
+pub fn diff_tree_inner(element: &Element) -> anyhow::Result<()> {
+    for child in element.children.borrow().iter() {
+        debug!("Element {:?} {:?}", element.et, element.name);
+        diff_tree_inner(child);
+    }
+
+    Ok(())
+}
+
+pub fn diff_tree(elements: &[Element]) -> anyhow::Result<()> {
+    for element in elements {
+        debug!("*** Element from list {:?} ***", element.name);
+        diff_tree_inner(element);
+    }
+
+    Ok(())
+}
+
 pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
@@ -277,6 +295,8 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
         let csv_str = dump_csv_to_str(&result)?;
         debug!("{csv_str}");
     }
+
+    diff_tree(&trees);
 
     let result = ResultList {
         list: Rc::new(RefCell::new(Vec::new())),
