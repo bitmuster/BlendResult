@@ -61,9 +61,9 @@ fn status_to_result(status: &str) -> ResultType {
         "FAIL" => ResultType::Fail,
         "NOT RUN" => ResultType::NotRun,
         s => {
+            info!("Panic:  \"{s}\"");
             panic!("Panic:  \"{s}\"");
-            println!("Panic:  \"{s}\"");
-            ResultType::None
+            // ResultType::None
         }
     }
 }
@@ -187,7 +187,7 @@ fn parse_inner(
                     _ => (),
                 }
             }
-            /// Empty means that the element has no subelements, only attributes
+            // Empty means that the element has no subelements, only attributes
             Ok(Event::Empty(e)) => {
                 // println!("{ident}Empty {}", any::type_name_of_val(&e));
                 debug!(
@@ -232,7 +232,7 @@ fn parse_inner(
 pub fn diff_tree_inner(element: &Element) -> anyhow::Result<()> {
     for child in element.children.borrow().iter() {
         debug!("Element {:?} {:?}", element.et, element.name);
-        diff_tree_inner(child);
+        diff_tree_inner(child)?;
     }
 
     Ok(())
@@ -241,7 +241,7 @@ pub fn diff_tree_inner(element: &Element) -> anyhow::Result<()> {
 pub fn diff_tree(elements: &[Element]) -> anyhow::Result<()> {
     for element in elements {
         debug!("*** Element from list {:?} ***", element.name);
-        diff_tree_inner(element);
+        diff_tree_inner(element)?;
     }
 
     Ok(())
@@ -290,13 +290,13 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
 
     for result in results {
         for robot_result in result.list.borrow().iter() {
-            // println!("{result:?}")
+            trace!("{robot_result:?}")
         }
         let csv_str = dump_csv_to_str(&result)?;
         debug!("{csv_str}");
     }
 
-    diff_tree(&trees);
+    diff_tree(&trees)?;
 
     let result = ResultList {
         list: Rc::new(RefCell::new(Vec::new())),

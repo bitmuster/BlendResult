@@ -64,7 +64,7 @@ fn test_parser_b() -> anyhow::Result<()> {
     let filename = "robot/results/output_b.xml";
     let csv_file = "robot/results/output_b.csv";
     let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
-    let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
+    let _results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
     Ok(())
 }
 #[test]
@@ -168,12 +168,12 @@ fn test_parser_c() -> anyhow::Result<()> {
     let filename1 = "robot/results/output_c_pass.xml";
     let csv_file1 = "robot/results/output_c_pass.csv";
     let xml1 = fs::read_to_string(filename1).context(format!("File not found {}", filename1))?;
-    let results1 = blend_result::parse(&xml1, csv_file1).context("Parsing failed")?;
+    let _results1 = blend_result::parse(&xml1, csv_file1).context("Parsing failed")?;
 
     let filename2 = "robot/results/output_c_fail.xml";
     let csv_file2 = "robot/results/output_c_fail.csv";
     let xml2 = fs::read_to_string(filename2).context(format!("File not found {}", filename2))?;
-    let results2 = blend_result::parse(&xml2, csv_file2).context("Parsing failed")?;
+    let _results2 = blend_result::parse(&xml2, csv_file2).context("Parsing failed")?;
 
     let csv_file_blend = "robot/results/output_c_blednd.csv";
     let files = vec![filename1, filename2];
