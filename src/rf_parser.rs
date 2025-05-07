@@ -229,24 +229,39 @@ fn parse_inner(
     Ok(())
 }
 
-pub fn diff_tree_inner(element: &Element) -> anyhow::Result<()> {
-    for child in element.children.borrow().iter() {
-        debug!("Element {:?} {:?}", element.et, element.name);
-        diff_tree_inner(child)?;
-    }
+/// Should iterate over multiple trees of Elements to compare
+/// We are getting N trees and we want to compare each of the child elements
+/// This is similar to an N-times-zip function
+pub fn diff_tree(elements: &[Element]) -> anyhow::Result<()> {
+    // The results we accumulate
+    let result_list = Vec::new();
 
+    // The list of elements we want to compare
+    let element_list = Vec::new();
+
+    for element in elements {
+        debug!("Element {:?} {:?}", element.et, element.name);
+    }
+    /*
+        // if name == name
+        for child in element.children.borrow().iter() {
+            debug!("Element {:?} {:?}", element.et, element.name);
+            diff_tree_inner(child)?;
+        }
+    */
     Ok(())
 }
-
-pub fn diff_tree(elements: &[Element]) -> anyhow::Result<()> {
+/*
+/// Should iterate over multiple trees of Elements to compare
+pub fn diff_tree_weg(elements: &[Element]) -> anyhow::Result<()> {
     for element in elements {
-        debug!("*** Element from list {:?} ***", element.name);
+        debug!("*** Root-tree Element from list {:?} ***", element.name);
         diff_tree_inner(element)?;
     }
 
     Ok(())
 }
-
+*/
 pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
