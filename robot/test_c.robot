@@ -18,9 +18,10 @@ Demo Test C
     No Operation
     IF    ${failhere} == True
         Keyword C
+        Log    The if branch
         Fail
     ELSE
-        No Operation
+        Log    The else branch
     END
 
 Demo Test D

@@ -263,8 +263,9 @@ pub fn diff_tree(elements: &[&Element]) -> anyhow::Result<()> {
     */
 
     for (x, y) in u.children.borrow().iter().zip(v.children.borrow().iter()) {
-        debug!(" x, y {:?} {:?}", x.name, y.name);
-        //debug!(" x, y {:?} {:?}", x.et, y.et);
+        debug!("name: x, y {:?} {:?}", x.name, y.name);
+        debug!("    type : x, y {:?} {:?}", x.et, y.et);
+        debug!("    result:  x, y {:?} {:?}", x.result, y.result);
         let m: &Element = &x;
         let n: &Element = &y;
         diff_tree(&vec![m, n]);
@@ -326,7 +327,7 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
 
     for result in results {
         for robot_result in result.list.borrow().iter() {
-            trace!("{robot_result:?}")
+            trace!("Result contents: {robot_result:?}")
         }
         let csv_str = dump_csv_to_str(&result)?;
         debug!("{csv_str}");
