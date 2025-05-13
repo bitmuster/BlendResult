@@ -233,7 +233,7 @@ fn parse_inner(
 /// Should iterate over multiple trees of Elements to compare
 /// We are getting N trees and we want to compare each of the child elements
 /// This is similar to a generic N-times-zip function
-pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
+pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<()> {
     let u = &elements[0];
     let v = &elements[1];
     println!("What");
@@ -249,8 +249,9 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
     }
     */
 
-    let m; //: Option<&Element> = None;
-    let n; // : Option<&Element> = None;
+    // temporary values to store our borrowed children
+    let m;
+    let n;
 
     // k and l will be our iterators
     let mut k = match u {
@@ -285,28 +286,28 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
         let yc: Option<&Element>;
         match x {
             Some(s) => {
-                debug!("name: x {:?} {:?} {:?}", s.name, s.et, s.result);
+                debug!("name: x{} {:?} {:?} {:?}", depth, s.name, s.et, s.result);
                 xc = Some(&s);
             }
             None => {
-                debug!("name: x None");
+                debug!("name: x{} None", depth);
                 xc = None;
             }
         }
         match y {
             Some(t) => {
-                debug!("{}name: y {:?} {:?} {:?}", indent, t.name, t.et, t.result);
+                debug!("{}name: y{} {:?} {:?} {:?}", depth, indent, t.name, t.et, t.result);
                 yc = Some(&t);
             }
             None => {
-                debug!("{}name: y None", indent);
+                debug!("{}name: y{} None", indent, depth);
                 yc = None;
             }
         }
         if xc == None && yc == None {
             break;
         };
-        diff_tree(&vec![xc, yc])?;
+        diff_tree(&vec![xc, yc], depth+1)?;
     }
     Ok(())
 }
@@ -370,7 +371,7 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
         debug!("{csv_str}");
     }
     let whatever = vec![Some(&trees[0]), Some(&trees[1])];
-    diff_tree(&whatever)?;
+    diff_tree(&whatever, 0)?;
 
     let result = ResultList {
         list: Rc::new(RefCell::new(Vec::new())),
