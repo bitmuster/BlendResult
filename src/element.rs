@@ -27,6 +27,8 @@ pub enum ResultType {
 #[derive(Debug)]
 pub struct Element {
     pub et: ElementType,
+    // TODO Change this into a better pattern
+    // pub children: Rc<RefCell<Vec<Element>>>,
     pub children: RefCell<Vec<Rc<Element>>>,
     pub parent: RefCell<Weak<Element>>,
     pub result: ResultType,

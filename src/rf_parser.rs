@@ -236,7 +236,7 @@ fn parse_inner(
 pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
     let u = &elements[0];
     let v = &elements[1];
-
+    println!("What");
     /*
     for (x, y) in u.children.borrow().iter().zip(v.children.borrow().iter()) {
         debug!("name: x, y {:?} {:?}", x.name, y.name);
@@ -248,47 +248,66 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
     }
     */
 
-    let mut m: Option<&Element> = None;
-    let mut n: Option<&Element> = None;
+    let m; //: Option<&Element> = None;
+    let n; // : Option<&Element> = None;
+           //let mut mi;
+           //let mut ni;
 
     let mut k = match u {
-        Some(s) => Some(s.children.borrow()),
+        Some(s) => {
+            m = s.children.borrow();
+            Some(m.iter())
+        }
         None => None,
     };
     let mut l = match v {
-        Some(s) => Some(s.children.borrow()),
+        Some(s) => {
+            n = s.children.borrow();
+            Some(n.iter())
+        }
         None => None,
     };
-    while m != None && n != None {
+    let mut first = true;
+    //println!("mn {:?} {:?} {:?}", m,n,first);
+    //println!("kl {:?} {:?} {:?}", k,l,first);
+    let mut loo = 0;
+    while loo <= 3 {
+        //(m != None && n != None) || first == true) && loo <=3 {
+        loo += 1;
+        //println!("mn while {:?} {:?} {:?} {:?}", m,n,first, (m != None && n != None) || first == true);
+        first = false;
+        //println!("mn while {:?} {:?} {:?} {}", m,n,first, (m != None && n != None) || first == true);
         let x: Option<&Rc<Element>> = match k {
-            Some(ref s) => s.iter().next(),
+            Some(ref mut s) => s.next(),
             None => None,
         };
         let y: Option<&Rc<Element>> = match l {
-            Some(ref s) => s.iter().next(),
+            Some(ref mut s) => s.next(),
             None => None,
         };
+        //println!("xy {:?} {:?} {:?}", x.unwrap().name,y.unwrap().name,first);
         match x {
             Some(s) => {
                 debug!("name: x {:?}", s.name);
-                m = Some(&s);
+                //m = Some(&s);
             }
             None => {
                 debug!("name: x None");
-                m = None;
+                //m = None;
             }
         }
         match y {
             Some(t) => {
-                debug!("name: y {:?}", t.name);
-                n = Some(&t);
+                debug!("        name: y {:?}", t.name);
+                //n = Some(&t);
             }
             None => {
-                debug!("name: y None");
-                n = None;
+                debug!("        name: y None");
+                //n = None;
             }
         }
-        diff_tree(&vec![m, n])?;
+        //println!("mn {:?} {:?} {:?}", m,n,first);
+        //diff_tree(&vec![m, n])?;
     }
     Ok(())
 }
