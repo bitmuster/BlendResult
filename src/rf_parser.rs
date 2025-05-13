@@ -237,6 +237,7 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
     let u = &elements[0];
     let v = &elements[1];
     println!("What");
+    let indent = " ".repeat(32);
     /*
     for (x, y) in u.children.borrow().iter().zip(v.children.borrow().iter()) {
         debug!("name: x, y {:?} {:?}", x.name, y.name);
@@ -250,8 +251,6 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
 
     let m; //: Option<&Element> = None;
     let n; // : Option<&Element> = None;
-           //let mut mi;
-           //let mut ni;
 
     // k and l will be our iterators
     let mut k = match u {
@@ -268,16 +267,11 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
         }
         None => None,
     };
-    let mut first = true;
-    //println!("mn {:?} {:?} {:?}", m,n,first);
-    //println!("kl {:?} {:?} {:?}", k,l,first);
+
     let mut loo = 0;
     while loo <= 3 {
         //(m != None && n != None) || first == true) && loo <=3 {
         loo += 1;
-        //println!("mn while {:?} {:?} {:?} {:?}", m,n,first, (m != None && n != None) || first == true);
-        first = false;
-        //println!("mn while {:?} {:?} {:?} {}", m,n,first, (m != None && n != None) || first == true);
         let x: Option<&Rc<Element>> = match k {
             Some(ref mut s) => s.next(),
             None => None,
@@ -291,9 +285,7 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
         let yc: Option<&Element>;
         match x {
             Some(s) => {
-                debug!("name: x {:?}", s.name);
-                //k = Some(&s);
-                //xc= Some(&s.children.borrow());
+                debug!("name: x {:?} {:?} {:?}", s.name, s.et, s.result);
                 xc = Some(&s);
             }
             None => {
@@ -303,17 +295,14 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
         }
         match y {
             Some(t) => {
-                debug!("        name: y {:?}", t.name);
-                //yc = Some(&t.children.borrow());
+                debug!("{}name: y {:?} {:?} {:?}", indent, t.name, t.et, t.result);
                 yc = Some(&t);
-                //n = Some(&t);
             }
             None => {
-                debug!("        name: y None");
+                debug!("{}name: y None", indent);
                 yc = None;
             }
         }
-        //println!("mn {:?} {:?} {:?}", m,n,first);
         if xc == None && yc == None {
             break;
         };
