@@ -253,6 +253,7 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
            //let mut mi;
            //let mut ni;
 
+    // k and l will be our iterators
     let mut k = match u {
         Some(s) => {
             m = s.children.borrow();
@@ -286,28 +287,37 @@ pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
             None => None,
         };
         //println!("xy {:?} {:?} {:?}", x.unwrap().name,y.unwrap().name,first);
+        let xc: Option<&Element>;
+        let yc: Option<&Element>;
         match x {
             Some(s) => {
                 debug!("name: x {:?}", s.name);
-                //m = Some(&s);
+                //k = Some(&s);
+                //xc= Some(&s.children.borrow());
+                xc = Some(&s);
             }
             None => {
                 debug!("name: x None");
-                //m = None;
+                xc = None;
             }
         }
         match y {
             Some(t) => {
                 debug!("        name: y {:?}", t.name);
+                //yc = Some(&t.children.borrow());
+                yc = Some(&t);
                 //n = Some(&t);
             }
             None => {
                 debug!("        name: y None");
-                //n = None;
+                yc = None;
             }
         }
         //println!("mn {:?} {:?} {:?}", m,n,first);
-        //diff_tree(&vec![m, n])?;
+        if xc == None && yc == None {
+            break;
+        };
+        diff_tree(&vec![xc, yc])?;
     }
     Ok(())
 }
