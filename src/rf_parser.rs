@@ -236,9 +236,9 @@ fn parse_inner(
 pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<()> {
     let u = &elements[0];
     let v = &elements[1];
-    println!("What");
     let indent = " ".repeat(32);
-    /*
+
+    /* the easy version:
     for (x, y) in u.children.borrow().iter().zip(v.children.borrow().iter()) {
         debug!("name: x, y {:?} {:?}", x.name, y.name);
         debug!("    type : x, y {:?} {:?}", x.et, y.et);
@@ -296,7 +296,10 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
         }
         match y {
             Some(t) => {
-                debug!("{}name: y{} {:?} {:?} {:?}", depth, indent, t.name, t.et, t.result);
+                debug!(
+                    "{}name: y{} {:?} {:?} {:?}",
+                    indent, depth, t.name, t.et, t.result
+                );
                 yc = Some(&t);
             }
             None => {
@@ -307,7 +310,7 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
         if xc == None && yc == None {
             break;
         };
-        diff_tree(&vec![xc, yc], depth+1)?;
+        diff_tree(&vec![xc, yc], depth + 1)?;
     }
     Ok(())
 }
