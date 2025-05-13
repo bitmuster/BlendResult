@@ -131,9 +131,10 @@ fn test_parse_from_str_to_str_c() -> anyhow::Result<()> {
         Keyword,No Operation,Pass\n\
         Keyword,No Operation,Pass\n\
         Keyword,No Operation,Pass\n\
+        Keyword,Log,Pass\n\
         Keyword,Fail,Fail\n\
         Branch,,None\n\
-        Keyword,No Operation,NotRun\n\
+        Keyword,Log,NotRun\n\
         Test,Demo Test D,Pass\n\
         Keyword,Log To Console,Pass\n";
 
