@@ -9,6 +9,7 @@ use std::any;
 use std::cell::RefCell;
 use std::fs;
 use std::io;
+use std::iter;
 use std::iter::zip;
 use std::rc::Rc;
 use std::rc::Weak;
@@ -232,45 +233,63 @@ fn parse_inner(
 /// Should iterate over multiple trees of Elements to compare
 /// We are getting N trees and we want to compare each of the child elements
 /// This is similar to a generic N-times-zip function
-pub fn diff_tree(elements: &[&Element]) -> anyhow::Result<()> {
-    // The results we accumulate
-    // let result_list = Vec::new();
-
-    // The list of elements we want to compare
-
-    //let element_list : Vec<&Element>= Vec::new();
-
-    for element in elements {
-/*        debug!(
-            "Element {:?} {:?} {:?}",
-            element.et,
-            element.name,
-            element.children.borrow().len()
-        );*/
-        //let wtf = element.children.borrow_mut().get(0).unwrap();
-        //element_list.push(&wtf);
-    }
-
+pub fn diff_tree(elements: &[Option<&Element>]) -> anyhow::Result<()> {
     let u = &elements[0];
     let v = &elements[1];
 
     /*
-        // if name == name
-        for child in element.children.borrow().iter() {
-            debug!("Element {:?} {:?}", element.et, element.name);
-            diff_tree_inner(child)?;
-        }
-    */
-
     for (x, y) in u.children.borrow().iter().zip(v.children.borrow().iter()) {
         debug!("name: x, y {:?} {:?}", x.name, y.name);
         debug!("    type : x, y {:?} {:?}", x.et, y.et);
         debug!("    result:  x, y {:?} {:?}", x.result, y.result);
         let m: &Element = &x;
         let n: &Element = &y;
-        diff_tree(&vec![m, n]);
+        diff_tree(&vec![m, n])?;
     }
+    */
 
+    let mut m: Option<&Element> = None;
+    let mut n: Option<&Element> = None;
+
+    let mut k = match u {
+        Some(s) => Some(s.children.borrow()),
+        None => None,
+    };
+    let mut l = match v {
+        Some(s) => Some(s.children.borrow()),
+        None => None,
+    };
+    while m != None && n != None {
+        let x: Option<&Rc<Element>> = match k {
+            Some(ref s) => s.iter().next(),
+            None => None,
+        };
+        let y: Option<&Rc<Element>> = match l {
+            Some(ref s) => s.iter().next(),
+            None => None,
+        };
+        match x {
+            Some(s) => {
+                debug!("name: x {:?}", s.name);
+                m = Some(&s);
+            }
+            None => {
+                debug!("name: x None");
+                m = None;
+            }
+        }
+        match y {
+            Some(t) => {
+                debug!("name: y {:?}", t.name);
+                n = Some(&t);
+            }
+            None => {
+                debug!("name: y None");
+                n = None;
+            }
+        }
+        diff_tree(&vec![m, n])?;
+    }
     Ok(())
 }
 /*
@@ -332,7 +351,7 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
         let csv_str = dump_csv_to_str(&result)?;
         debug!("{csv_str}");
     }
-    let whatever = vec![&trees[0], &trees[1]];
+    let whatever = vec![Some(&trees[0]), Some(&trees[1])];
     diff_tree(&whatever)?;
 
     let result = ResultList {
