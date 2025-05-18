@@ -1,4 +1,5 @@
 use anyhow::Context;
+use colored::Colorize;
 use csv::Writer;
 use log::{debug, info, trace, warn};
 use quick_xml::events::attributes;
@@ -274,7 +275,12 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
         match x {
             Some(s) => {
                 trace!("name: x{} {:?} {:?} {:?}", depth, s.name, s.et, s.result);
-                state_left = format!("{:?} {:?} {:?}", s.name, s.et, s.result);
+                state_left = format!(
+                    "{} {:?} {}",
+                    s.name.blue(),
+                    s.et,
+                    s.result.to_string().yellow()
+                );
                 xc = Some(s);
             }
             None => {
@@ -293,7 +299,12 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
                     t.et,
                     t.result
                 );
-                state_right = format!("{:?} {:?} {:?}", t.name, t.et, t.result);
+                state_right = format!(
+                    "{} {:?} {}",
+                    t.name.blue(),
+                    t.et,
+                    t.result.to_string().yellow()
+                );
                 yc = Some(t);
             }
             None => {
@@ -305,7 +316,8 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
         if xc.is_none() && yc.is_none() {
             break;
         };
-        debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
+        //debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
+        println!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
         diff_tree(&[xc, yc], depth + 1)?;
     }
     Ok(())

@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::fmt;
 use std::rc::{Rc, Weak};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -22,6 +23,12 @@ pub enum ResultType {
     Fail,
     NotRun,
     None,
+}
+
+impl fmt::Display for ResultType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 #[derive(Debug)]
