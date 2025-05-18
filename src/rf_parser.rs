@@ -8,9 +8,6 @@ use quick_xml::reader::Reader;
 use std::any;
 use std::cell::RefCell;
 use std::fs;
-use std::io;
-use std::iter;
-use std::iter::zip;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::str;
@@ -285,8 +282,8 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
         //println!("xy {:?} {:?} {:?}", x.unwrap().name,y.unwrap().name,first);
         let xc: Option<&Element>;
         let yc: Option<&Element>;
-        let mut state_left: String = "".to_string();
-        let mut state_right: String = "".to_string();
+        let state_left: String;
+        let state_right: String;
         match x {
             Some(s) => {
                 trace!("name: x{} {:?} {:?} {:?}", depth, s.name, s.et, s.result);
