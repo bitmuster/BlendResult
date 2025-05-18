@@ -235,17 +235,6 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
     let v = &elements[1];
     let indent = " ".repeat(32);
 
-    /* the easy version:
-    for (x, y) in u.children.borrow().iter().zip(v.children.borrow().iter()) {
-        debug!("name: x, y {:?} {:?}", x.name, y.name);
-        debug!("    type : x, y {:?} {:?}", x.et, y.et);
-        debug!("    result:  x, y {:?} {:?}", x.result, y.result);
-        let m: &Element = &x;
-        let n: &Element = &y;
-        diff_tree(&vec![m, n])?;
-    }
-    */
-
     // temporary values to store our borrowed children Vec
     let m;
     let n;
@@ -266,11 +255,10 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
         None => None,
     };
 
-    let mut loo = 0;
+    let mut depth = 0;
     let max_depth = 10;
-    while loo <= max_depth {
-        //(m != None && n != None) || first == true) && loo <=3 {
-        loo += 1;
+    while depth <= max_depth {
+        depth += 1;
         let x: Option<&Rc<Element>> = match k {
             Some(ref mut s) => s.next(),
             None => None,
@@ -279,7 +267,6 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
             Some(ref mut s) => s.next(),
             None => None,
         };
-        //println!("xy {:?} {:?} {:?}", x.unwrap().name,y.unwrap().name,first);
         let xc: Option<&Element>;
         let yc: Option<&Element>;
         let state_left: String;
