@@ -167,16 +167,8 @@ fn test_parser_c() -> anyhow::Result<()> {
     common::run_rf_test_with_options("c", true, "_fail", "--variable failhere:True")?;
 
     let filename1 = "robot/results/output_c_pass.xml";
-    let csv_file1 = "robot/results/output_c_pass.csv";
-    let xml1 = fs::read_to_string(filename1).context(format!("File not found {}", filename1))?;
-    // let _results1 = blend_result::parse(&xml1, csv_file1).context("Parsing failed")?;
-
     let filename2 = "robot/results/output_c_fail.xml";
-    let csv_file2 = "robot/results/output_c_fail.csv";
-    let xml2 = fs::read_to_string(filename2).context(format!("File not found {}", filename2))?;
-    // let _results2 = blend_result::parse(&xml2, csv_file2).context("Parsing failed")?;
-
-    let csv_file_blend = "robot/results/output_c_blednd.csv";
+    let csv_file_blend = "robot/results/output_c_bledned.csv";
     let files = vec![filename1, filename2];
     let _ = blend(&files, csv_file_blend);
     Ok(())

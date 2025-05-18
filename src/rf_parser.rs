@@ -288,11 +288,11 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
             Some(s) => {
                 trace!("name: x{} {:?} {:?} {:?}", depth, s.name, s.et, s.result);
                 state_left = format!("{:?} {:?} {:?}", s.name, s.et, s.result);
-                xc = Some(&s);
+                xc = Some(s);
             }
             None => {
                 trace!("name: x{} None", depth);
-                state_left = format!("None");
+                state_left = "-".to_string();
                 xc = None;
             }
         }
@@ -307,34 +307,24 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
                     t.result
                 );
                 state_right = format!("{:?} {:?} {:?}", t.name, t.et, t.result);
-                yc = Some(&t);
+                yc = Some(t);
             }
             None => {
                 trace!("{}name: y{} None", indent, depth);
-                state_right = format!("None");
+                state_right = "-".to_string();
                 yc = None;
             }
         }
-        if xc == None && yc == None {
+        if xc.is_none() && yc.is_none() {
             break;
         };
         debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
-        diff_tree(&vec![xc, yc], depth + 1)?;
+        diff_tree(&[xc, yc], depth + 1)?;
     }
     Ok(())
 }
-/*
-/// Should iterate over multiple trees of Elements to compare
-pub fn diff_tree_weg(elements: &[Element]) -> anyhow::Result<()> {
-    for element in elements {
-        debug!("*** Root-tree Element from list {:?} ***", element.name);
-        diff_tree_inner(element)?;
-    }
 
-    Ok(())
-}
-*/
-pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
+pub fn blend(xml_files: &[&str], _csv_file: &str) -> anyhow::Result<ResultList> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
     let mut stats: Vec<ParserStats> = Vec::new();
@@ -370,7 +360,7 @@ pub fn blend(xml_files: &[&str], csv_file: &str) -> anyhow::Result<ResultList> {
         let mut result = ResultList {
             list: Rc::new(RefCell::new(Vec::new())),
         };
-        dump_flat(&tree, &mut result);
+        dump_flat(tree, &mut result);
         println!("Parsed {} flat elements", result.list.borrow().len());
         results.push(result)
     }
@@ -452,18 +442,18 @@ pub fn parse_from_str_to_str(xml_data: &str) -> anyhow::Result<String> {
         println!("{result:?}")
     }*/
 
-    Ok(dump_csv_to_str(&results)?)
+    dump_csv_to_str(&results)
 }
 
 fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
     //let mut wtr = csv::Writer::from_writer(io::stdout());
     let mut wtr = csv::Writer::from_path(csv_file)?;
 
-    wtr.write_record(&["Type", "Name", "Result"])?;
+    wtr.write_record(["Type", "Name", "Result"])?;
     for child in results.list.borrow().iter() {
         wtr.write_record(&[
             format!("{:?}", child.et),
-            format!("{}", child.name),
+            child.name.to_string(),
             format!("{:?}", child.result),
         ])?;
     }
@@ -474,11 +464,11 @@ fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
 
 fn dump_csv_to_str(results: &ResultList) -> anyhow::Result<String> {
     let mut wtr = Writer::from_writer(vec![]);
-    wtr.write_record(&["Type", "Name", "Result"])?;
+    wtr.write_record(["Type", "Name", "Result"])?;
     for child in results.list.borrow().iter() {
         wtr.write_record(&[
             format!("{:?}", child.et),
-            format!("{}", child.name),
+            child.name.to_string(),
             format!("{:?}", child.result),
         ])?;
     }
