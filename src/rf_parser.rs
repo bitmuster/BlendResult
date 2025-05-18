@@ -249,7 +249,7 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
     }
     */
 
-    // temporary values to store our borrowed children
+    // temporary values to store our borrowed children Vec
     let m;
     let n;
 
@@ -270,7 +270,8 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
     };
 
     let mut loo = 0;
-    while loo <= 3 {
+    let max_depth = 10;
+    while loo <= max_depth {
         //(m != None && n != None) || first == true) && loo <=3 {
         loo += 1;
         let x: Option<&Rc<Element>> = match k {
@@ -284,32 +285,43 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
         //println!("xy {:?} {:?} {:?}", x.unwrap().name,y.unwrap().name,first);
         let xc: Option<&Element>;
         let yc: Option<&Element>;
+        let mut state_left: String = "".to_string();
+        let mut state_right: String = "".to_string();
         match x {
             Some(s) => {
-                debug!("name: x{} {:?} {:?} {:?}", depth, s.name, s.et, s.result);
+                trace!("name: x{} {:?} {:?} {:?}", depth, s.name, s.et, s.result);
+                state_left = format!("{:?} {:?} {:?}", s.name, s.et, s.result);
                 xc = Some(&s);
             }
             None => {
-                debug!("name: x{} None", depth);
+                trace!("name: x{} None", depth);
+                state_left = format!("None");
                 xc = None;
             }
         }
         match y {
             Some(t) => {
-                debug!(
+                trace!(
                     "{}name: y{} {:?} {:?} {:?}",
-                    indent, depth, t.name, t.et, t.result
+                    indent,
+                    depth,
+                    t.name,
+                    t.et,
+                    t.result
                 );
+                state_right = format!("{:?} {:?} {:?}", t.name, t.et, t.result);
                 yc = Some(&t);
             }
             None => {
-                debug!("{}name: y{} None", indent, depth);
+                trace!("{}name: y{} None", indent, depth);
+                state_right = format!("None");
                 yc = None;
             }
         }
         if xc == None && yc == None {
             break;
         };
+        debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
         diff_tree(&vec![xc, yc], depth + 1)?;
     }
     Ok(())
