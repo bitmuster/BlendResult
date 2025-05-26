@@ -244,7 +244,26 @@ mod TestMultiResultList {
             result: ResultType::Pass,
             name: "a suite".to_string(),
         })]);
-        /*mrl.push(vec![
+        println!("{:?}", mrl);
+        let result = mrl.list.borrow();
+
+        // TODO switch to assert_matches when stable
+        if let Some(_) = result[0][0] {
+        } else {
+            panic!("Pattern does not match")
+        }
+    }
+    #[test]
+    fn create_elements() {
+        let mrl = MultiResultList::new();
+        println!("{:?}", mrl);
+
+        mrl.push(vec![Some(ElementFlat {
+            et: ElementType::Suite,
+            result: ResultType::Pass,
+            name: "a suite".to_string(),
+        })]);
+        mrl.push(vec![
             Some(ElementFlat {
                 et: ElementType::Suite,
                 result: ResultType::Pass,
@@ -255,13 +274,18 @@ mod TestMultiResultList {
                 result: ResultType::Fail,
                 name: "another suite".to_string(),
             }),
-        ]);*/
+        ]);
         println!("{:?}", mrl);
         let result = mrl.list.borrow();
 
+        // TODO switch to assert_matches when stable
         if let Some(_) = result[0][0] {
         } else {
-            panic!("Ohn no")
+            panic!("Pattern does not match")
+        }
+        if let [Some(_), Some(_)] = result[1][..] {
+        } else {
+            panic!("Pattern 2 does not match")
         }
     }
 }
