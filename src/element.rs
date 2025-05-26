@@ -246,7 +246,7 @@ mod test {
 }
 
 #[cfg(test)]
-mod TestMultiResultList {
+mod test_multi_result_list {
     use super::*;
 
     #[test]
@@ -260,15 +260,16 @@ mod TestMultiResultList {
         Ok(())
     }
     #[test]
-    fn create_none() {
+    fn create_none() -> anyhow::Result<()> {
         let mrl = MultiResultList::new(1);
         let el: Vec<Option<ElementFlat>> = vec![None];
-        mrl.push(el);
+        mrl.push(el)?;
         let result = mrl.list.borrow();
-        assert_eq!(result[0], vec![None])
+        assert_eq!(result[0], vec![None]);
+        Ok(())
     }
     #[test]
-    fn create_element() {
+    fn create_element() -> anyhow::Result<()> {
         let mrl = MultiResultList::new(1);
         println!("{:?}", mrl);
 
@@ -276,7 +277,7 @@ mod TestMultiResultList {
             et: ElementType::Suite,
             result: ResultType::Pass,
             name: "a suite".to_string(),
-        })]);
+        })])?;
         println!("{:?}", mrl);
         let result = mrl.list.borrow();
 
@@ -285,6 +286,7 @@ mod TestMultiResultList {
         } else {
             panic!("Pattern does not match")
         }
+        Ok(())
     }
     #[test]
     fn create_elements() -> anyhow::Result<()> {
