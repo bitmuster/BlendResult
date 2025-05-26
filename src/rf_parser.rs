@@ -231,6 +231,8 @@ fn parse_inner(
 /// Should iterate over multiple trees of Elements to compare
 /// We are getting N trees and we want to compare each of the child elements
 /// This is similar to a generic N-times-zip function
+///
+/// Though, only two comparisons are currently allowed.
 pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<()> {
     let u = &elements[0];
     let v = &elements[1];
@@ -328,6 +330,7 @@ pub fn blend(xml_files: &[&str], _csv_file: &str) -> anyhow::Result<ResultList> 
     let mut results: Vec<ResultList> = Vec::new();
     let mut stats: Vec<ParserStats> = Vec::new();
 
+    // Parse input files
     for xml_file in xml_files {
         println!("Parsing {}", xml_file);
         let xml_data =
@@ -352,9 +355,7 @@ pub fn blend(xml_files: &[&str], _csv_file: &str) -> anyhow::Result<ResultList> 
         stats.push(stat);
     }
 
-    // println!("Root {:#?}", root_element);
-    // println!("{:?}", current);
-
+    // Dump flat contents just as reference to compare
     for tree in trees.iter() {
         let mut result = ResultList {
             list: Rc::new(RefCell::new(Vec::new())),
@@ -364,6 +365,7 @@ pub fn blend(xml_files: &[&str], _csv_file: &str) -> anyhow::Result<ResultList> 
         results.push(result)
     }
 
+    // Dump unblended csv
     for result in results {
         for robot_result in result.list.borrow().iter() {
             trace!("Result contents: {robot_result:?}")
@@ -371,8 +373,9 @@ pub fn blend(xml_files: &[&str], _csv_file: &str) -> anyhow::Result<ResultList> 
         let csv_str = dump_csv_to_str(&result)?;
         debug!("{csv_str}");
     }
-    let whatever = vec![Some(&trees[0]), Some(&trees[1])];
-    diff_tree(&whatever, 0)?;
+
+    let trees_to_diff = vec![Some(&trees[0]), Some(&trees[1])];
+    diff_tree(&trees_to_diff, 0)?;
 
     let result = ResultList {
         list: Rc::new(RefCell::new(Vec::new())),
