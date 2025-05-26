@@ -73,6 +73,22 @@ impl PartialEq for ResultList {
     }
 }
 
+#[derive(Debug)]
+pub struct MultiResultList {
+    pub list: Rc<RefCell<Vec<Vec<Option<ElementFlat>>>>>,
+}
+
+impl MultiResultList {
+    fn new() -> Self {
+        MultiResultList {
+            list: Rc::new(RefCell::new(Vec::new())),
+        }
+    }
+    fn push(&self, value: Vec<Option<ElementFlat>>) {
+        self.list.borrow_mut().push(value)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -195,5 +211,57 @@ mod test {
         let mut parent = kw.parent.borrow_mut();
         *parent = Rc::downgrade(&test);
         test.children.borrow_mut().push(kw.clone());
+    }
+}
+
+#[cfg(test)]
+mod TestMultiResultList {
+    use super::*;
+
+    #[test]
+    fn create_empty() {
+        let mrl = MultiResultList::new();
+        let el: Vec<Option<ElementFlat>> = vec![];
+        mrl.push(el);
+        let result = mrl.list.borrow();
+        assert_eq!(result[0], vec![])
+    }
+    #[test]
+    fn create_none() {
+        let mrl = MultiResultList::new();
+        let el: Vec<Option<ElementFlat>> = vec![None];
+        mrl.push(el);
+        let result = mrl.list.borrow();
+        assert_eq!(result[0], vec![None])
+    }
+    #[test]
+    fn create_element() {
+        let mrl = MultiResultList::new();
+        println!("{:?}", mrl);
+
+        mrl.push(vec![Some(ElementFlat {
+            et: ElementType::Suite,
+            result: ResultType::Pass,
+            name: "a suite".to_string(),
+        })]);
+        /*mrl.push(vec![
+            Some(ElementFlat {
+                et: ElementType::Suite,
+                result: ResultType::Pass,
+                name: "a suite".to_string(),
+            }),
+            Some(ElementFlat {
+                et: ElementType::Keyword,
+                result: ResultType::Fail,
+                name: "another suite".to_string(),
+            }),
+        ]);*/
+        println!("{:?}", mrl);
+        let result = mrl.list.borrow();
+
+        if let Some(_) = result[0][0] {
+        } else {
+            panic!("Ohn no")
+        }
     }
 }
