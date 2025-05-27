@@ -15,6 +15,12 @@ calls and csv files.
     cargo test test_parser_c -- --show-output
     RUST_LOG=trace cargo test test_parser_c -- --show-output
 
+# Setup
+
+    python3 -m venv venv
+    . venv/bin/activate
+    pip install robotframework
+
 # Documentation
 
 Relevant crates:
