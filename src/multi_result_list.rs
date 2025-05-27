@@ -33,15 +33,22 @@ impl MultiResultList {
 
     fn dump_to_csv_str(&self) -> anyhow::Result<String> {
         let mut wtr = Writer::from_writer(vec![]);
-
-        wtr.write_record(["Type", "Name", "Result"])?;
+        let mut record: Vec<String> = Vec::new();
+        for result in 0..self.width {
+            record.push(format!("Type {result}"));
+            record.push(format!("Name {result}"));
+            record.push(format!("Result {result}"));
+        }
+        wtr.write_record(&record)?;
 
         for child in self.list.borrow().iter() {
-            wtr.write_record(&[
-                format!("{:?}", child[0].as_ref().unwrap().et),
-                child[0].as_ref().unwrap().name.to_string(),
-                format!("{:?}", child[0].as_ref().unwrap().result),
-            ])?;
+            let mut record: Vec<String> = Vec::new();
+            for _result in 0..self.width {
+                record.push(format!("{:?}", child[0].as_ref().unwrap().et));
+                record.push(child[0].as_ref().unwrap().name.to_string());
+                record.push(format!("{:?}", child[0].as_ref().unwrap().result));
+            }
+            wtr.write_record(&record)?;
         }
 
         wtr.flush()?;
