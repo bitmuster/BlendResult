@@ -2,8 +2,9 @@ use csv::Writer;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::element::{ElementFlat, ElementType, ResultType};
 use anyhow::anyhow;
+
+use crate::element::{ElementFlat, ElementType, ResultType};
 
 #[derive(Debug)]
 pub struct MultiResultList {
@@ -12,13 +13,13 @@ pub struct MultiResultList {
 }
 
 impl MultiResultList {
-    fn new(width: usize) -> Self {
+    pub fn new(width: usize) -> Self {
         MultiResultList {
             list: Rc::new(RefCell::new(Vec::new())),
-            width: width,
+            width,
         }
     }
-    fn push(&self, value: Vec<Option<ElementFlat>>) -> anyhow::Result<()> {
+    pub fn push(&self, value: Vec<Option<ElementFlat>>) -> anyhow::Result<()> {
         if value.len() == self.width {
             self.list.borrow_mut().push(value);
         } else {
@@ -31,7 +32,7 @@ impl MultiResultList {
         Ok(())
     }
 
-    fn dump_to_csv_str(&self) -> anyhow::Result<String> {
+    pub fn dump_to_csv_str(&self) -> anyhow::Result<String> {
         let mut wtr = Writer::from_writer(vec![]);
         let mut record: Vec<String> = Vec::new();
         for result in 0..self.width {
@@ -62,7 +63,7 @@ mod test_multi_result_list {
 
     #[test]
     fn create_empty() -> anyhow::Result<()> {
-        let mrl = MultiResultList::new(0);
+        let mrl = MultiResultList::new(0); // TODO unclear if 0 make sense
         let el: Vec<Option<ElementFlat>> = vec![];
         mrl.push(el)?;
         let result = mrl.list.borrow();

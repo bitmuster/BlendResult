@@ -14,6 +14,7 @@ use std::rc::Weak;
 use std::str;
 
 use crate::element::{Element, ElementFlat, ElementType, ResultList, ResultType};
+use crate::multi_result_list::MultiResultList;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -233,7 +234,11 @@ fn parse_inner(
 /// This is similar to a generic N-times-zip function
 ///
 /// Though, only two comparisons are currently allowed.
-pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<()> {
+pub fn diff_tree(
+    elements: &[Option<&Element>],
+    mrl: &MultiResultList,
+    depth: usize,
+) -> anyhow::Result<()> {
     let u = &elements[0];
     let v = &elements[1];
     let indent = " ".repeat(32);
@@ -320,12 +325,12 @@ pub fn diff_tree(elements: &[Option<&Element>], depth: usize) -> anyhow::Result<
         };
         //debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
         println!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
-        diff_tree(&[xc, yc], depth + 1)?;
+        diff_tree(&[xc, yc], &mrl, depth + 1)?;
     }
     Ok(())
 }
 
-pub fn blend(xml_files: &[&str], _csv_file: &str) -> anyhow::Result<ResultList> {
+pub fn blend(xml_files: &[&str]) -> anyhow::Result<()> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
     let mut stats: Vec<ParserStats> = Vec::new();
@@ -375,12 +380,9 @@ pub fn blend(xml_files: &[&str], _csv_file: &str) -> anyhow::Result<ResultList> 
     }
 
     let trees_to_diff = vec![Some(&trees[0]), Some(&trees[1])];
-    diff_tree(&trees_to_diff, 0)?;
-
-    let result = ResultList {
-        list: Rc::new(RefCell::new(Vec::new())),
-    };
-    Ok(result)
+    let mrl = MultiResultList::new(2);
+    diff_tree(&trees_to_diff, &mrl, 0)?;
+    Ok(())
 }
 
 pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
