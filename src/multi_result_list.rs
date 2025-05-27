@@ -1,0 +1,141 @@
+use csv::Writer;
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use crate::element::{ElementFlat, ElementType, ResultType};
+use anyhow::anyhow;
+
+#[derive(Debug)]
+pub struct MultiResultList {
+    pub list: Rc<RefCell<Vec<Vec<Option<ElementFlat>>>>>,
+    pub width: usize,
+}
+
+impl MultiResultList {
+    fn new(width: usize) -> Self {
+        MultiResultList {
+            list: Rc::new(RefCell::new(Vec::new())),
+            width: width,
+        }
+    }
+    fn push(&self, value: Vec<Option<ElementFlat>>) -> anyhow::Result<()> {
+        if value.len() == self.width {
+            self.list.borrow_mut().push(value);
+        } else {
+            return Err(anyhow!(
+                "Width {} does not match {}",
+                value.len(),
+                self.width
+            ));
+        }
+        Ok(())
+    }
+
+    fn dump_to_csv_str(&self) -> anyhow::Result<String> {
+        let mut wtr = Writer::from_writer(vec![]);
+
+        wtr.write_record(["Type", "Name", "Result"])?;
+
+        for child in self.list.borrow().iter() {
+            wtr.write_record(&[
+                format!("{:?}", child[0].as_ref().unwrap().et),
+                child[0].as_ref().unwrap().name.to_string(),
+                format!("{:?}", child[0].as_ref().unwrap().result),
+            ])?;
+        }
+
+        wtr.flush()?;
+        Ok(String::from_utf8(wtr.into_inner()?)?)
+    }
+}
+
+#[cfg(test)]
+mod test_multi_result_list {
+    use super::*;
+
+    #[test]
+    fn create_empty() -> anyhow::Result<()> {
+        let mrl = MultiResultList::new(0);
+        let el: Vec<Option<ElementFlat>> = vec![];
+        mrl.push(el)?;
+        let result = mrl.list.borrow();
+        println!("{:?}", mrl);
+        assert_eq!(result[0], vec![]);
+        Ok(())
+    }
+    #[test]
+    fn create_none() -> anyhow::Result<()> {
+        let mrl = MultiResultList::new(1);
+        let el: Vec<Option<ElementFlat>> = vec![None];
+        mrl.push(el)?;
+        let result = mrl.list.borrow();
+        assert_eq!(result[0], vec![None]);
+        Ok(())
+    }
+    #[test]
+    fn create_element() -> anyhow::Result<()> {
+        let mrl = MultiResultList::new(1);
+        println!("{:?}", mrl);
+
+        mrl.push(vec![Some(ElementFlat {
+            et: ElementType::Suite,
+            result: ResultType::Pass,
+            name: "a suite".to_string(),
+        })])?;
+        println!("{:?}", mrl);
+        let result = mrl.list.borrow();
+
+        // TODO switch to assert_matches when stable
+        if let Some(_) = result[0][0] {
+        } else {
+            panic!("Pattern does not match")
+        }
+        Ok(())
+    }
+    #[test]
+    fn create_elements() -> anyhow::Result<()> {
+        let mrl = MultiResultList::new(2);
+        println!("{:?}", mrl);
+
+        mrl.push(vec![
+            Some(ElementFlat {
+                et: ElementType::Suite,
+                result: ResultType::Pass,
+                name: "a suite".to_string(),
+            }),
+            None,
+        ])?;
+        mrl.push(vec![
+            Some(ElementFlat {
+                et: ElementType::Suite,
+                result: ResultType::Pass,
+                name: "a suite".to_string(),
+            }),
+            Some(ElementFlat {
+                et: ElementType::Keyword,
+                result: ResultType::Fail,
+                name: "another suite".to_string(),
+            }),
+        ])?;
+        println!("{:?}", mrl);
+        let result = mrl.list.borrow();
+
+        // TODO switch to assert_matches when stable
+        if let Some(_) = result[0][0] {
+        } else {
+            panic!("Pattern does not match")
+        }
+        if let None = result[0][1] {
+        } else {
+            panic!("Pattern does not match")
+        }
+        if let [Some(_), Some(_)] = result[1][..] {
+        } else {
+            panic!("Pattern 2 does not match")
+        }
+
+        let mlrs = mrl.dump_to_csv_str();
+        println!("{}", mlrs.unwrap());
+        Ok(())
+    }
+}
