@@ -400,6 +400,9 @@ pub fn blend(xml_files: &[&str]) -> anyhow::Result<()> {
     let trees_to_diff = vec![Some(&trees[0]), Some(&trees[1])];
     let mrl = MultiResultList::new(2);
     diff_tree(&trees_to_diff, &mrl, 0)?;
+    //println!("{:?}",mrl);
+    println!("{}", mrl.dump_to_csv_str().unwrap());
+
     Ok(())
 }
 

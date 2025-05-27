@@ -40,15 +40,17 @@ impl MultiResultList {
             record.push(format!("Name {result}"));
             record.push(format!("Result {result}"));
         }
+        //println!("{record:?}");
         wtr.write_record(&record)?;
 
         for child in self.list.borrow().iter() {
             let mut record: Vec<String> = Vec::new();
-            for _result in 0..self.width {
-                record.push(format!("{:?}", child[0].as_ref().unwrap().et));
-                record.push(child[0].as_ref().unwrap().name.to_string());
-                record.push(format!("{:?}", child[0].as_ref().unwrap().result));
+            for result in 0..self.width {
+                record.push(format!("{:?}", child[result].as_ref().unwrap().et));
+                record.push(child[result].as_ref().unwrap().name.to_string());
+                record.push(format!("{:?}", child[result].as_ref().unwrap().result));
             }
+            println!("{record:?}");
             wtr.write_record(&record)?;
         }
 
