@@ -263,10 +263,11 @@ pub fn diff_tree(
         None => None,
     };
 
-    let mut depth = 0;
+    //let mut depth = 0;
     let max_depth = 10;
     while depth <= max_depth {
-        depth += 1;
+        let mut elf: Vec<Option<ElementFlat>> = Vec::new();
+        //depth += 1; // TODO WTF, why two +1 see recursion
         let x: Option<&Rc<Element>> = match k {
             Some(ref mut s) => s.next(),
             None => None,
@@ -282,6 +283,11 @@ pub fn diff_tree(
         match x {
             Some(s) => {
                 trace!("name: x{} {:?} {:?} {:?}", depth, s.name, s.et, s.result);
+                elf.push(Some(ElementFlat {
+                    et: s.et.clone(),
+                    result: s.result.clone(),
+                    name: s.name.clone(),
+                }));
                 state_left = format!(
                     "{} {:?} {}",
                     s.name.blue(),
@@ -292,6 +298,7 @@ pub fn diff_tree(
             }
             None => {
                 trace!("name: x{} None", depth);
+                elf.push(None);
                 state_left = "-".to_string();
                 xc = None;
             }
@@ -306,6 +313,12 @@ pub fn diff_tree(
                     t.et,
                     t.result
                 );
+                elf.push(Some(ElementFlat {
+                    et: t.et.clone(),
+                    result: t.result.clone(),
+                    name: t.name.clone(),
+                }));
+
                 state_right = format!(
                     "{} {:?} {}",
                     t.name.blue(),
@@ -316,9 +329,14 @@ pub fn diff_tree(
             }
             None => {
                 trace!("{}name: y{} None", indent, depth);
+                elf.push(None);
                 state_right = "-".to_string();
                 yc = None;
             }
+        }
+        {
+            let mut mrlb = mrl.list.borrow_mut();
+            mrlb.push(elf);
         }
         if xc.is_none() && yc.is_none() {
             break;
