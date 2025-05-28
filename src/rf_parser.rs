@@ -334,12 +334,12 @@ pub fn diff_tree(
                 yc = None;
             }
         }
+        if xc.is_none() && yc.is_none() {
+            break;
+        };
         {
             let mut mrlb = mrl.list.borrow_mut();
             mrlb.push(elf);
-        }
-        if xc.is_none() && yc.is_none() {
-            break;
         };
         //debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
         println!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
