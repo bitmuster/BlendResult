@@ -46,9 +46,18 @@ impl MultiResultList {
         for child in self.list.borrow().iter() {
             let mut record: Vec<String> = Vec::new();
             for result in 0..self.width {
-                record.push(format!("{:?}", child[result].as_ref().unwrap().et));
-                record.push(child[result].as_ref().unwrap().name.to_string());
-                record.push(format!("{:?}", child[result].as_ref().unwrap().result));
+                match child[result].as_ref() {
+                    Some(r) => {
+                        record.push(format!("{:?}", r.et));
+                        record.push(r.name.to_string());
+                        record.push(format!("{:?}", r.result));
+                    }
+                    None => {
+                        record.push("-".to_string());
+                        record.push("-".to_string());
+                        record.push("-".to_string());
+                    }
+                }
             }
             println!("{record:?}");
             wtr.write_record(&record)?;
