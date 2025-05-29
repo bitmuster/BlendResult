@@ -59,7 +59,7 @@ impl MultiResultList {
                     }
                 }
             }
-            println!("{record:?}");
+            // println!("{record:?}");
             wtr.write_record(&record)?;
         }
 

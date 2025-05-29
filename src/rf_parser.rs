@@ -35,6 +35,7 @@ impl From<AttrError> for AppError {
     }
 }
 
+/// Print all XML attributes
 fn print_attributes(ident: &str, attr: attributes::Attributes) {
     for a in attr {
         let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
@@ -43,6 +44,8 @@ fn print_attributes(ident: &str, attr: attributes::Attributes) {
     }
 }
 
+/// Return the value of an XML attribute by the attribute name.
+/// Otherwise return an empty string.
 fn get_attr_name<'a>(name: &'a str, attr: attributes::Attributes<'a>) -> String {
     for a in attr {
         let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
@@ -55,6 +58,8 @@ fn get_attr_name<'a>(name: &'a str, attr: attributes::Attributes<'a>) -> String 
     //panic!("Cannot get attr {name}");
 }
 
+/// Convert a string status to a ResultType
+/// TODO This could belong to ResultType
 fn status_to_result(status: &str) -> ResultType {
     match status {
         "PASS" => ResultType::Pass,
@@ -72,7 +77,7 @@ struct ParserStats {
     max_depth: usize,
 }
 
-/// Slightly cursed parser for output.xml files
+/// Slightly cursed recursive parser for output.xml files
 fn parse_inner(
     reader: &mut Reader<&[u8]>,
     element: &mut Element,
@@ -341,13 +346,14 @@ pub fn diff_tree(
             let mut mrlb = mrl.list.borrow_mut();
             mrlb.push(elf);
         };
-        //debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
+        // debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
         println!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
         diff_tree(&[xc, yc], &mrl, depth + 1)?;
     }
     Ok(())
 }
 
+/// Blend XML files into a multiresult list and generate a CSV string
 pub fn blend(xml_files: &[&str]) -> anyhow::Result<()> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
@@ -374,7 +380,7 @@ pub fn blend(xml_files: &[&str]) -> anyhow::Result<()> {
 
         parse_inner(&mut reader, &mut root_element, depth, &mut stat)?;
         trees.push(root_element);
-        println!("Maximum tree depth {}", stat.max_depth);
+        debug!("Maximum tree depth {}", stat.max_depth);
         stats.push(stat);
     }
 
@@ -384,7 +390,7 @@ pub fn blend(xml_files: &[&str]) -> anyhow::Result<()> {
             list: Rc::new(RefCell::new(Vec::new())),
         };
         dump_flat(tree, &mut result);
-        println!("Parsed {} flat elements", result.list.borrow().len());
+        debug!("Parsed {} flat elements", result.list.borrow().len());
         results.push(result)
     }
 
@@ -406,6 +412,7 @@ pub fn blend(xml_files: &[&str]) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Parse a XML str and dump it into a CSV file
 pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     let mut reader = Reader::from_str(xml_data);
     reader.config_mut().trim_text(true);
@@ -439,6 +446,8 @@ pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     Ok(results)
 }
 
+/// Parse a XML str and dump it into a CSV str
+/// TODO combine with parse above
 pub fn parse_from_str_to_str(xml_data: &str) -> anyhow::Result<String> {
     let mut reader = Reader::from_str(xml_data);
     reader.config_mut().trim_text(true);
@@ -470,6 +479,7 @@ pub fn parse_from_str_to_str(xml_data: &str) -> anyhow::Result<String> {
     dump_csv_to_str(&results)
 }
 
+/// Dump a ResultList into a single CSV file
 fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
     //let mut wtr = csv::Writer::from_writer(io::stdout());
     let mut wtr = csv::Writer::from_path(csv_file)?;
@@ -487,6 +497,8 @@ fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Dump a ResultList into a single CSV String
+/// TODO combine with above
 fn dump_csv_to_str(results: &ResultList) -> anyhow::Result<String> {
     let mut wtr = Writer::from_writer(vec![]);
     wtr.write_record(["Type", "Name", "Result"])?;
@@ -502,6 +514,7 @@ fn dump_csv_to_str(results: &ResultList) -> anyhow::Result<String> {
     Ok(String::from_utf8(wtr.into_inner()?)?)
 }
 
+/// Dump an Element tree into a flat ResultList
 fn dump_flat(element: &Element, results: &mut ResultList) {
     debug!("Flat Dump:");
     //println!("{:?}; {}", element.et, element.name);
@@ -513,6 +526,7 @@ fn dump_flat(element: &Element, results: &mut ResultList) {
     dump_flat_inner(element, results);
 }
 
+/// Internas of dumping an Element tree into a flat ResultList
 fn dump_flat_inner(element: &Element, results: &mut ResultList) {
     for child in element.children.borrow().iter() {
         debug!("{:?}; {}; {:?}", child.et, child.name, child.result);
