@@ -240,47 +240,43 @@ fn parse_inner(
 /// We are getting N trees and we want to compare each of the child elements
 /// This is similar to a generic N-times-zip function
 ///
-/// Though, only two comparisons are currently allowed.
+/// TODO reduce complexity
 pub fn diff_tree(
     elements: &[Option<&Element>],
     mrl: &MultiResultList,
     depth: usize,
 ) -> anyhow::Result<()> {
-    let indent = " ".repeat(32);
     let len = elements.len();
 
     // temporary values to store our borrowed children Vec
-    //let mut borrowed_children: Vec<&Option<Vec<Rc<Element>>>> = Vec::new();
     let mut borrowed_children: Vec<Option<Ref<'_, Vec<Rc<Element>>>>> = Vec::new();
 
     for element in elements.iter() {
-        let mut children = match element {
+        let children = match element {
             Some(s) => Some(s.children.borrow()),
             None => None,
         };
         borrowed_children.push(children);
     }
 
-    // old type "core::option::Option<core::slice::iter::Iter<alloc::rc::Rc<blend_result::element::Element>>>"
     let mut iterators: Vec<Option<Iter<Rc<Element>>>> = Vec::new();
 
     for child in borrowed_children.iter() {
-        let mut iterator = match child {
+        let iterator = match child {
             Some(s) => Some(s.iter()),
             None => None,
         };
         iterators.push(iterator);
     }
 
-    let max_depth = 10;
-    while depth <= max_depth {
+    loop {
         let mut elf: Vec<Option<ElementFlat>> = Vec::new();
-        //depth += 1; // TODO WTF, why two +1 see recursion
 
         let mut count = 0;
         let mut velem: Vec<Option<&Element>> = Vec::new();
+        let mut state: String = String::new();
         for iterator in iterators.iter_mut() {
-            let mut x: Option<&Rc<Element>> = match iterator {
+            let x: Option<&Rc<Element>> = match iterator {
                 Some(ref mut s) => s.next(),
                 None => None,
             };
@@ -300,18 +296,18 @@ pub fn diff_tree(
                         result: s.result.clone(),
                         name: s.name.clone(),
                     }));
-                    /*state_left = format!(
-                        "{} {:?} {}",
+                    state.push_str(&format!(
+                        "{:<16} {:<16?} {:<16} ",
                         s.name.blue(),
                         s.et,
                         s.result.to_string().yellow()
-                    );*/
+                    ));
                     velem.push(Some(s));
                 }
                 None => {
                     trace!("name: {}-{} None", count, depth);
                     elf.push(None);
-                    /*state_left = "-".to_string();*/
+                    state.push_str(&format!("{:<16} {:<16?} {:<16}", "-", "-", "-"));
                     velem.push(None);
                 }
             }
@@ -328,7 +324,7 @@ pub fn diff_tree(
         };
 
         // debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
-        // println!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
+        println!("{}", state);
         diff_tree(&velem, &mrl, depth + 1)?;
     }
     Ok(())
@@ -384,7 +380,6 @@ pub fn blend(xml_files: &[&str]) -> anyhow::Result<()> {
         debug!("{csv_str}");
     }
 
-    // let trees_to_diff = vec![Some(&trees[0]), Some(&trees[1])];
     let trees_to_diff: Vec<Option<&Element>> = trees.iter().map(|t| Some(t)).collect();
 
     let mrl = MultiResultList::new(trees.len());
