@@ -168,8 +168,9 @@ fn test_parser_c() -> anyhow::Result<()> {
 
     let filename1 = "robot/results/output_c_pass.xml";
     let filename2 = "robot/results/output_c_fail.xml";
+    let filename3 = "robot/results/output_c_pass.xml";
     let csv_file_blend = "robot/results/output_c_bledned.csv";
-    let files = vec![filename1, filename2];
+    let files = vec![filename1, filename2, filename3];
     let result = blend(&files);
     Ok(())
 }
