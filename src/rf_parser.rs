@@ -276,12 +276,12 @@ pub fn diff_tree(
         let mut velem: Vec<Option<&Element>> = Vec::new();
         let mut state: String = String::new();
         for iterator in iterators.iter_mut() {
-            let x: Option<&Rc<Element>> = match iterator {
+            let next: Option<&Rc<Element>> = match iterator {
                 Some(ref mut s) => s.next(),
                 None => None,
             };
 
-            match x {
+            match next {
                 Some(s) => {
                     trace!(
                         "name: {}-{} {:?} {:?} {:?}",
@@ -323,7 +323,6 @@ pub fn diff_tree(
             mrlb.push(elf);
         };
 
-        // debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
         println!("{}", state);
         diff_tree(&velem, &mrl, depth + 1)?;
     }
