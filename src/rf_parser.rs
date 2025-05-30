@@ -7,10 +7,12 @@ use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
 use std::any;
+use std::cell::Ref;
 use std::cell::RefCell;
 use std::fs;
 use std::rc::Rc;
 use std::rc::Weak;
+use std::slice::Iter;
 use std::str;
 
 use crate::element::{Element, ElementFlat, ElementType, ResultList, ResultType};
@@ -244,111 +246,90 @@ pub fn diff_tree(
     mrl: &MultiResultList,
     depth: usize,
 ) -> anyhow::Result<()> {
-    let u = &elements[0];
-    let v = &elements[1];
     let indent = " ".repeat(32);
+    let len = elements.len();
 
     // temporary values to store our borrowed children Vec
-    let m;
-    let n;
+    //let mut borrowed_children: Vec<&Option<Vec<Rc<Element>>>> = Vec::new();
+    let mut borrowed_children: Vec<Option<Ref<'_, Vec<Rc<Element>>>>> = Vec::new();
 
-    // k and l will be our iterators
-    let mut k = match u {
-        Some(s) => {
-            m = s.children.borrow();
-            Some(m.iter())
-        }
-        None => None,
-    };
-    let mut l = match v {
-        Some(s) => {
-            n = s.children.borrow();
-            Some(n.iter())
-        }
-        None => None,
-    };
+    for element in elements.iter() {
+        let mut children = match element {
+            Some(s) => Some(s.children.borrow()),
+            None => None,
+        };
+        borrowed_children.push(children);
+    }
 
-    //let mut depth = 0;
+    // old type "core::option::Option<core::slice::iter::Iter<alloc::rc::Rc<blend_result::element::Element>>>"
+    let mut iterators: Vec<Option<Iter<Rc<Element>>>> = Vec::new();
+
+    for child in borrowed_children.iter() {
+        let mut iterator = match child {
+            Some(s) => Some(s.iter()),
+            None => None,
+        };
+        iterators.push(iterator);
+    }
+
     let max_depth = 10;
     while depth <= max_depth {
         let mut elf: Vec<Option<ElementFlat>> = Vec::new();
         //depth += 1; // TODO WTF, why two +1 see recursion
-        let x: Option<&Rc<Element>> = match k {
-            Some(ref mut s) => s.next(),
-            None => None,
-        };
-        let y: Option<&Rc<Element>> = match l {
-            Some(ref mut s) => s.next(),
-            None => None,
-        };
-        let xc: Option<&Element>;
-        let yc: Option<&Element>;
-        let state_left: String;
-        let state_right: String;
-        match x {
-            Some(s) => {
-                trace!("name: x{} {:?} {:?} {:?}", depth, s.name, s.et, s.result);
-                elf.push(Some(ElementFlat {
-                    et: s.et.clone(),
-                    result: s.result.clone(),
-                    name: s.name.clone(),
-                }));
-                state_left = format!(
-                    "{} {:?} {}",
-                    s.name.blue(),
-                    s.et,
-                    s.result.to_string().yellow()
-                );
-                xc = Some(s);
-            }
-            None => {
-                trace!("name: x{} None", depth);
-                elf.push(None);
-                state_left = "-".to_string();
-                xc = None;
-            }
-        }
-        match y {
-            Some(t) => {
-                trace!(
-                    "{}name: y{} {:?} {:?} {:?}",
-                    indent,
-                    depth,
-                    t.name,
-                    t.et,
-                    t.result
-                );
-                elf.push(Some(ElementFlat {
-                    et: t.et.clone(),
-                    result: t.result.clone(),
-                    name: t.name.clone(),
-                }));
 
-                state_right = format!(
-                    "{} {:?} {}",
-                    t.name.blue(),
-                    t.et,
-                    t.result.to_string().yellow()
-                );
-                yc = Some(t);
+        let mut count = 0;
+        let mut velem: Vec<Option<&Element>> = Vec::new();
+        for iterator in iterators.iter_mut() {
+            let mut x: Option<&Rc<Element>> = match iterator {
+                Some(ref mut s) => s.next(),
+                None => None,
+            };
+
+            match x {
+                Some(s) => {
+                    trace!(
+                        "name: {}-{} {:?} {:?} {:?}",
+                        count,
+                        depth,
+                        s.name,
+                        s.et,
+                        s.result
+                    );
+                    elf.push(Some(ElementFlat {
+                        et: s.et.clone(),
+                        result: s.result.clone(),
+                        name: s.name.clone(),
+                    }));
+                    /*state_left = format!(
+                        "{} {:?} {}",
+                        s.name.blue(),
+                        s.et,
+                        s.result.to_string().yellow()
+                    );*/
+                    velem.push(Some(s));
+                }
+                None => {
+                    trace!("name: {}-{} None", count, depth);
+                    elf.push(None);
+                    /*state_left = "-".to_string();*/
+                    velem.push(None);
+                }
             }
-            None => {
-                trace!("{}name: y{} None", indent, depth);
-                elf.push(None);
-                state_right = "-".to_string();
-                yc = None;
-            }
+            count += 1;
         }
-        if xc.is_none() && yc.is_none() {
+
+        if velem.iter().filter(|s| s.is_none()).count() == len {
             break;
-        };
+        }
+
         {
             let mut mrlb = mrl.list.borrow_mut();
             mrlb.push(elf);
         };
+
         // debug!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
-        println!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
-        diff_tree(&[xc, yc], &mrl, depth + 1)?;
+        // println!("d{:2}: {:<40} -- {}", depth, state_left, state_right);
+        diff_tree(&velem, &mrl, depth + 1)?;
     }
     Ok(())
 }
