@@ -1,19 +1,23 @@
+use std::any;
+use std::cell::Ref;
+use std::cell::RefCell;
+use std::fs;
+use std::fs::File;
+use std::io::Write;
+use std::rc::Rc;
+use std::rc::Weak;
+use std::slice::Iter;
+use std::str;
+
 use anyhow::Context;
 use colored::Colorize;
 use csv::Writer;
+
 use log::{debug, info, trace, warn};
 use quick_xml::events::attributes;
 use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
-use std::any;
-use std::cell::Ref;
-use std::cell::RefCell;
-use std::fs;
-use std::rc::Rc;
-use std::rc::Weak;
-use std::slice::Iter;
-use std::str;
 
 use crate::element::{Element, ElementFlat, ElementType, ResultList, ResultType};
 use crate::multi_result_list::MultiResultList;

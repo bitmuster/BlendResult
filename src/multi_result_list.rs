@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use anyhow::anyhow;
 
-use crate::element::{ElementFlat, ElementType, ResultType};
+use crate::element::ElementFlat;
 
 #[derive(Debug)]
 pub struct MultiResultList {
@@ -71,6 +71,7 @@ impl MultiResultList {
 #[cfg(test)]
 mod test_multi_result_list {
     use super::*;
+    use crate::element::{ElementFlat, ElementType, ResultType};
 
     #[test]
     fn create_empty() -> anyhow::Result<()> {
