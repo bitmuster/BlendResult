@@ -19,10 +19,11 @@ struct Cli {
 enum Commands {
     Parse {
         filename: Option<String>,
-        csv_file: Option<String>,
+        output: Option<String>,
     },
     Blend {
-        name: Option<String>,
+        output: String,
+        input: Vec<String>,
     },
 }
 
@@ -32,13 +33,14 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Parse { filename, csv_file } => {
+        Commands::Parse { filename, output } => {
             println!("Parsing {}", filename.as_ref().unwrap());
             let xml = fs::read_to_string(filename.as_ref().unwrap()).context("Reading failed")?;
-            rf_parser::parse(&xml, &csv_file.as_ref().unwrap())?;
+            rf_parser::parse(&xml, &output.as_ref().unwrap())?;
         }
-        Commands::Blend { name } => {
-            println!("'myapp add' was used, name is: {name:?}");
+        Commands::Blend { input, output } => {
+            println!("Blending {:?} {}", input, output);
+            rf_parser::blend(input, output)?;
         }
     }
     Ok(())

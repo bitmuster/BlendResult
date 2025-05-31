@@ -330,7 +330,7 @@ pub fn diff_tree(
 }
 
 /// Blend XML files into a multiresult list and generate a CSV string
-pub fn blend(xml_files: &[&str]) -> anyhow::Result<()> {
+pub fn blend(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result<()> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
     let mut stats: Vec<ParserStats> = Vec::new();
