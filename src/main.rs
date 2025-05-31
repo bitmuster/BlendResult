@@ -1,11 +1,11 @@
-use anyhow::{self, Context};
-use std::env;
 use std::fs;
+
+use anyhow::{self, Context};
+use clap::{Parser, Subcommand};
+
 mod element;
 mod multi_result_list;
 mod rf_parser;
-
-use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -40,7 +40,7 @@ fn main() -> anyhow::Result<()> {
         }
         Commands::Blend { input, output } => {
             println!("Blending {:?} {}", input, output);
-            rf_parser::blend(input, output)?;
+            rf_parser::blend_and_save(input, output)?;
         }
     }
     Ok(())

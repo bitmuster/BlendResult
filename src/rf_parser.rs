@@ -330,7 +330,17 @@ pub fn diff_tree(
 }
 
 /// Blend XML files into a multiresult list and generate a CSV string
-pub fn blend(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result<()> {
+pub fn blend_and_save(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result<()> {
+    let result = blend(xml_files)?;
+
+    let mut buffer = File::create(csv_file)?;
+    buffer.write(result.as_bytes())?;
+
+    Ok(())
+}
+
+/// Blend XML files into a multiresult list and generate a CSV string
+pub fn blend(xml_files: &Vec<String>) -> anyhow::Result<String> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
     let mut stats: Vec<ParserStats> = Vec::new();
@@ -384,9 +394,10 @@ pub fn blend(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result<()> {
     let mrl = MultiResultList::new(trees.len());
     diff_tree(&trees_to_diff, &mrl, 0)?;
     //println!("{:?}",mrl);
-    println!("{}", mrl.dump_to_csv_str().unwrap());
 
-    Ok(())
+    // println!("{}", mrl.dump_to_csv_str().unwrap());
+
+    Ok(mrl.dump_to_csv_str()?)
 }
 
 /// Parse a XML str and dump it into a CSV file
@@ -417,7 +428,7 @@ pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     for result in results.list.borrow().iter() {
         println!("{result:?}")
     }*/
-    dump_csv(csv_file, &results)?;
+    dump_csv_file(csv_file, &results)?;
     println!("Parsed {} elements", results.list.borrow().len());
     println!("Maximum tree depth {}", stats.max_depth);
     Ok(results)
@@ -457,7 +468,7 @@ pub fn parse_from_str_to_str(xml_data: &str) -> anyhow::Result<String> {
 }
 
 /// Dump a ResultList into a single CSV file
-fn dump_csv(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
+fn dump_csv_file(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
     //let mut wtr = csv::Writer::from_writer(io::stdout());
     let mut wtr = csv::Writer::from_path(csv_file)?;
 
