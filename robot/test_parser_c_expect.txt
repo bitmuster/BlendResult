@@ -1,0 +1,27 @@
+Type 0,Name 0,Result 0,Type 1,Name 1,Result 1,Type 2,Name 2,Result 2
+Suite,Test C,Pass,Suite,Test C,Fail,Suite,Test C,Pass
+Test,Demo Test A,Pass,Test,Demo Test A,Pass,Test,Demo Test A,Pass
+Keyword,Keyword A,Pass,Keyword,Keyword A,Pass,Keyword,Keyword A,Pass
+Keyword,No Operation,Pass,Keyword,No Operation,Pass,Keyword,No Operation,Pass
+Test,Demo Test B,Pass,Test,Demo Test B,Pass,Test,Demo Test B,Pass
+Keyword,No Operation,Pass,Keyword,No Operation,Pass,Keyword,No Operation,Pass
+Keyword,Keyword B,Pass,Keyword,Keyword B,Pass,Keyword,Keyword B,Pass
+Keyword,Keyword A,Pass,Keyword,Keyword A,Pass,Keyword,Keyword A,Pass
+Keyword,No Operation,Pass,Keyword,No Operation,Pass,Keyword,No Operation,Pass
+Keyword,No Operation,Pass,Keyword,No Operation,Pass,Keyword,No Operation,Pass
+Test,Demo Test C,Pass,Test,Demo Test C,Fail,Test,Demo Test C,Pass
+Keyword,No Operation,Pass,Keyword,No Operation,Pass,Keyword,No Operation,Pass
+If,,None,If,,Fail,If,,None
+Branch,,None,Branch,,Fail,Branch,,None
+Keyword,Keyword C,NotRun,Keyword,Keyword C,Pass,Keyword,Keyword C,NotRun
+-,-,-,Keyword,Keyword B,Pass,-,-,-
+-,-,-,Keyword,Keyword A,Pass,-,-,-
+-,-,-,Keyword,No Operation,Pass,-,-,-
+-,-,-,Keyword,No Operation,Pass,-,-,-
+-,-,-,Keyword,No Operation,Pass,-,-,-
+Keyword,Log,NotRun,Keyword,Log,Pass,Keyword,Log,NotRun
+Keyword,Fail,NotRun,Keyword,Fail,Fail,Keyword,Fail,NotRun
+Branch,,None,Branch,,None,Branch,,None
+Keyword,Log,Pass,Keyword,Log,NotRun,Keyword,Log,Pass
+Test,Demo Test D,Pass,Test,Demo Test D,Pass,Test,Demo Test D,Pass
+Keyword,Log To Console,Pass,Keyword,Log To Console,Pass,Keyword,Log To Console,Pass

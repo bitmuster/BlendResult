@@ -333,9 +333,17 @@ pub fn diff_tree(
     Ok(())
 }
 
-/// Blend XML files into a multiresult list and generate a CSV string
+/// Blend XML files into a multiresult list and write a CSV file
 pub fn blend_and_save(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result<()> {
-    let result = blend(xml_files)?;
+    let mut xml_data: Vec<String> = vec![];
+    // Parse input files
+    for xml_file in xml_files {
+        println!("Parsing {}", xml_file);
+        xml_data
+            .push(fs::read_to_string(xml_file).context(format!("File not found {}", xml_file))?);
+    }
+
+    let result = blend(&xml_data)?;
 
     let mut buffer = File::create(csv_file)?;
     buffer.write(result.as_bytes())?;
@@ -343,19 +351,15 @@ pub fn blend_and_save(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result
     Ok(())
 }
 
-/// Blend XML files into a multiresult list and generate a CSV string
-pub fn blend(xml_files: &Vec<String>) -> anyhow::Result<String> {
+/// Blend XML data into a multiresult list and generate a CSV string
+pub fn blend(xml_data: &Vec<String>) -> anyhow::Result<String> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
     let mut stats: Vec<ParserStats> = Vec::new();
 
     // Parse input files
-    for xml_file in xml_files {
-        println!("Parsing {}", xml_file);
-        let xml_data =
-            fs::read_to_string(xml_file).context(format!("File not found {}", xml_file))?;
-
-        let mut reader = Reader::from_str(&xml_data);
+    for xml in xml_data {
+        let mut reader = Reader::from_str(&xml);
         reader.config_mut().trim_text(true);
 
         let depth = 0;

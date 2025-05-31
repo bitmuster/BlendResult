@@ -1,7 +1,7 @@
 use std::fs;
 mod common;
 use anyhow::{self, Context};
-use blend_result::blend;
+use blend_result::{blend, blend_and_save};
 use blend_result::element::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -169,12 +169,25 @@ fn test_parser_c() -> anyhow::Result<()> {
     let filename1 = "robot/results/output_c_pass.xml";
     let filename2 = "robot/results/output_c_fail.xml";
     let filename3 = "robot/results/output_c_pass.xml";
-    //let csv_file_blend = "robot/results/output_c_bledned.csv";
+    let csv_file_blend = "robot/results/output_c_bledned.csv";
     let files = vec![
         filename1.to_string(),
         filename2.to_string(),
         filename3.to_string(),
     ];
-    let _result = blend(&files)?;
+
+    let xmls = vec![
+        fs::read_to_string(filename1).unwrap(),
+        fs::read_to_string(filename2).unwrap(),
+        fs::read_to_string(filename3).unwrap(),
+    ];
+
+    let result = blend(&xmls)?;
+    // println!("{:?}",result);
+    let expect = fs::read_to_string("robot/test_parser_c_expect.txt").unwrap();
+    assert_eq!(expect, result);
+
+    let _ok = blend_and_save(&files, csv_file_blend)?;
+
     Ok(())
 }
