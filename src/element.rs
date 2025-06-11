@@ -23,6 +23,7 @@ pub enum ResultType {
     Fail,
     NotRun,
     None,
+    Skip,
 }
 
 impl fmt::Display for ResultType {

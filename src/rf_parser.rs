@@ -71,6 +71,7 @@ fn status_to_result(status: &str) -> ResultType {
         "PASS" => ResultType::Pass,
         "FAIL" => ResultType::Fail,
         "NOT RUN" => ResultType::NotRun,
+        "SKIP" => ResultType::Skip,
         s => {
             info!("Panic:  \"{s}\"");
             panic!("Panic:  \"{s}\"");
