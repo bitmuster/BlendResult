@@ -13,7 +13,7 @@ use csv::Writer;
 use log::{debug, info, trace, warn};
 use quick_xml::encoding::Decoder;
 use quick_xml::events::attributes;
-use quick_xml::events::attributes::AttrError;
+use quick_xml::events::attributes::{AttrError, Attribute};
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
 
@@ -39,23 +39,29 @@ impl From<AttrError> for AppError {
     }
 }
 
+/// Convert Attribute to key and value
+/// TODO: Can we change the return type to e.g. back to Cow and &str?
+fn get_attribute_kv(decoder: Decoder, a: Result<Attribute, AttrError>) -> (String, String) {
+    let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
+    let value;
+    #[cfg(feature = "odson")]
+    {
+        value = a
+            .unwrap()
+            .decode_and_unescape_value_with(decoder, |_| None)
+            .unwrap();
+    }
+    #[cfg(not(feature = "odson"))]
+    {
+        value = a.unwrap().unescape_value().unwrap();
+    }
+    (key.to_string(), value.to_string())
+}
+
 /// Print all XML attributes
 fn print_attributes(decoder: Decoder, ident: &str, attr: attributes::Attributes) {
     for a in attr {
-        let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
-        let value;
-        #[cfg(feature = "odson")]
-        {
-            value = a
-                .unwrap()
-                .decode_and_unescape_value_with(decoder, |_| None)
-                .unwrap()
-        }
-        #[cfg(not(feature = "odson"))]
-        {
-            value = a.unwrap().unescape_value().unwrap()
-        }
-
+        let (key, value) = get_attribute_kv(decoder, a);
         debug!("{ident}    Attr: {:?} {:?}", key, value);
     }
 }
@@ -64,19 +70,7 @@ fn print_attributes(decoder: Decoder, ident: &str, attr: attributes::Attributes)
 /// Otherwise return an empty string.
 fn get_attr_name<'a>(decoder: Decoder, name: &'a str, attr: attributes::Attributes<'a>) -> String {
     for a in attr {
-        let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
-        let value;
-        #[cfg(feature = "odson")]
-        {
-            value = a
-                .unwrap()
-                .decode_and_unescape_value_with(decoder, |_| None)
-                .unwrap()
-        }
-        #[cfg(not(feature = "odson"))]
-        {
-            value = a.unwrap().unescape_value().unwrap()
-        }
+        let (key, value) = get_attribute_kv(decoder, a);
         if name == key {
             return value.to_string();
         }
