@@ -184,6 +184,7 @@ dependencies = [
  "clap",
  "colored 3.0.0",
  "csv",
+ "icu_locid",
  "log",
  "quick-xml",
  "simple_logger",
