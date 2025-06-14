@@ -11,6 +11,7 @@ use colored::Colorize;
 use csv::Writer;
 
 use log::{debug, info, trace, warn};
+use quick_xml::encoding::Decoder;
 use quick_xml::events::attributes;
 use quick_xml::events::attributes::AttrError;
 use quick_xml::events::Event;
@@ -39,20 +40,43 @@ impl From<AttrError> for AppError {
 }
 
 /// Print all XML attributes
-fn print_attributes(ident: &str, attr: attributes::Attributes) {
+fn print_attributes(decoder: Decoder, ident: &str, attr: attributes::Attributes) {
     for a in attr {
         let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
-        let value = a.unwrap().unescape_value().unwrap();
+        let value;
+        #[cfg(feature = "odson")]
+        {
+            value = a
+                .unwrap()
+                .decode_and_unescape_value_with(decoder, |_| None)
+                .unwrap()
+        }
+        #[cfg(not(feature = "odson"))]
+        {
+            value = a.unwrap().unescape_value().unwrap()
+        }
+
         debug!("{ident}    Attr: {:?} {:?}", key, value);
     }
 }
 
 /// Return the value of an XML attribute by the attribute name.
 /// Otherwise return an empty string.
-fn get_attr_name<'a>(name: &'a str, attr: attributes::Attributes<'a>) -> String {
+fn get_attr_name<'a>(decoder: Decoder, name: &'a str, attr: attributes::Attributes<'a>) -> String {
     for a in attr {
         let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
-        let value = a.unwrap().unescape_value().unwrap();
+        let value;
+        #[cfg(feature = "odson")]
+        {
+            value = a
+                .unwrap()
+                .decode_and_unescape_value_with(decoder, |_| None)
+                .unwrap()
+        }
+        #[cfg(not(feature = "odson"))]
+        {
+            value = a.unwrap().unescape_value().unwrap()
+        }
         if name == key {
             return value.to_string();
         }
@@ -89,7 +113,7 @@ pub fn parse_inner(
     stats: &mut ParserStats,
 ) -> anyhow::Result<()> {
     let mut buf = Vec::new();
-
+    let decoder = reader.decoder();
     if depth > stats.max_depth {
         stats.max_depth = depth;
     }
@@ -109,8 +133,8 @@ pub fn parse_inner(
                     "{ident}Start: {}",
                     str::from_utf8(e.local_name().as_ref()).unwrap()
                 );
-                print_attributes(&ident, e.attributes());
-                let name = get_attr_name("name", e.attributes());
+                print_attributes(decoder, &ident, e.attributes());
+                let name = get_attr_name(decoder, "name", e.attributes());
                 let mut et: Option<ElementType> = None;
                 match e.name().as_ref() {
                     b"robot" => (),
@@ -145,7 +169,7 @@ pub fn parse_inner(
                     }
                 }
                 if e.name().as_ref() == b"status" {
-                    let status = get_attr_name("status", e.attributes());
+                    let status = get_attr_name(decoder, "status", e.attributes());
                     debug!("{ident}Got status from Start Element {:?}", status);
                     element.result = status_to_result(&status);
                 }
@@ -211,10 +235,10 @@ pub fn parse_inner(
                     s => panic!("Cannot parse {}", str::from_utf8(s).unwrap()),
                 }
 
-                print_attributes(&ident, e.attributes());
+                print_attributes(decoder, &ident, e.attributes());
                 match element.et {
                     ElementType::Keyword | ElementType::Suite | ElementType::Test => {
-                        let status = get_attr_name("status", e.attributes());
+                        let status = get_attr_name(decoder, "status", e.attributes());
                         debug!("{ident}Got status from Empty element {:?}", status);
                         element.result = status_to_result(&status);
                     }
