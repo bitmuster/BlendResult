@@ -16,7 +16,7 @@ use crate::multi_result_list::MultiResultList;
 use crate::rf_parser::{diff_tree, dump_csv_to_str, dump_flat, parse_inner, ParserStats};
 
 /// Blend XML files into a multiresult list and write a CSV file
-pub fn blend_and_save(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result<()> {
+pub fn blend_and_save_to_csv(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result<()> {
     let mut xml_data: Vec<String> = vec![];
     // Parse input files
     for xml_file in xml_files {

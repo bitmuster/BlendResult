@@ -1,7 +1,7 @@
 use std::fs;
 mod common;
 use anyhow::{self, Context};
-use blend_result::blend_results::{blend, blend_and_save};
+use blend_result::blend_results::{blend, blend_and_save_to_csv};
 use blend_result::element::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -187,7 +187,7 @@ fn test_parser_c() -> anyhow::Result<()> {
     let expect = fs::read_to_string("robot/test_parser_c_expect.txt").unwrap();
     assert_eq!(expect, result);
 
-    let _ok = blend_and_save(&files, csv_file_blend)?;
+    let _ok = blend_and_save_to_csv(&files, csv_file_blend)?;
 
     Ok(())
 }

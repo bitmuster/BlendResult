@@ -41,7 +41,7 @@ fn main() -> anyhow::Result<()> {
         }
         Commands::Blend { input, output } => {
             println!("Blending {:?} {}", input, output);
-            blend_results::blend_and_save(input, output)?;
+            blend_results::blend_and_save_to_csv(input, output)?;
         }
     }
     Ok(())
