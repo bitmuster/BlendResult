@@ -1,7 +1,7 @@
 use std::fs;
 mod common;
 use anyhow::{self, Context};
-use blend_result::{blend, blend_and_save};
+use blend_result::blend_results::{blend, blend_and_save};
 use blend_result::element::*;
 use std::cell::RefCell;
 use std::rc::Rc;

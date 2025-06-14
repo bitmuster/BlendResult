@@ -1,15 +1,12 @@
 use std::any;
 use std::cell::Ref;
 use std::cell::RefCell;
-use std::fs;
-use std::fs::File;
-use std::io::Write;
 use std::rc::Rc;
 use std::rc::Weak;
 use std::slice::Iter;
 use std::str;
 
-use anyhow::Context;
+// use anyhow::Context;
 use colored::Colorize;
 use csv::Writer;
 
@@ -80,12 +77,12 @@ fn status_to_result(status: &str) -> ResultType {
     }
 }
 
-struct ParserStats {
-    max_depth: usize,
+pub struct ParserStats {
+    pub max_depth: usize,
 }
 
 /// Slightly cursed recursive parser for output.xml files
-fn parse_inner(
+pub fn parse_inner(
     reader: &mut Reader<&[u8]>,
     element: &mut Element,
     depth: usize,
@@ -334,81 +331,6 @@ pub fn diff_tree(
     Ok(())
 }
 
-/// Blend XML files into a multiresult list and write a CSV file
-pub fn blend_and_save(xml_files: &Vec<String>, csv_file: &str) -> anyhow::Result<()> {
-    let mut xml_data: Vec<String> = vec![];
-    // Parse input files
-    for xml_file in xml_files {
-        println!("Parsing {}", xml_file);
-        xml_data
-            .push(fs::read_to_string(xml_file).context(format!("File not found {}", xml_file))?);
-    }
-
-    let result = blend(&xml_data)?;
-
-    let mut buffer = File::create(csv_file)?;
-    buffer.write(result.as_bytes())?;
-
-    Ok(())
-}
-
-/// Blend XML data into a multiresult list and generate a CSV string
-pub fn blend(xml_data: &Vec<String>) -> anyhow::Result<String> {
-    let mut trees: Vec<Element> = Vec::new();
-    let mut results: Vec<ResultList> = Vec::new();
-    let mut stats: Vec<ParserStats> = Vec::new();
-
-    // Parse input files
-    for xml in xml_data {
-        let mut reader = Reader::from_str(&xml);
-        reader.config_mut().trim_text(true);
-
-        let depth = 0;
-        let mut root_element: Element = Element {
-            et: ElementType::Robot,
-            children: RefCell::new(Vec::new()),
-            parent: RefCell::new(Weak::new()),
-            result: ResultType::None,
-            name: String::new(),
-        };
-        let mut stat = ParserStats { max_depth: 0 };
-
-        parse_inner(&mut reader, &mut root_element, depth, &mut stat)?;
-        trees.push(root_element);
-        debug!("Maximum tree depth {}", stat.max_depth);
-        stats.push(stat);
-    }
-
-    // Dump flat contents just as reference to compare
-    for tree in trees.iter() {
-        let mut result = ResultList {
-            list: Rc::new(RefCell::new(Vec::new())),
-        };
-        dump_flat(tree, &mut result);
-        debug!("Parsed {} flat elements", result.list.borrow().len());
-        results.push(result)
-    }
-
-    // Dump unblended csv
-    for result in results {
-        for robot_result in result.list.borrow().iter() {
-            trace!("Result contents: {robot_result:?}")
-        }
-        let csv_str = dump_csv_to_str(&result)?;
-        debug!("{csv_str}");
-    }
-
-    let trees_to_diff: Vec<Option<&Element>> = trees.iter().map(|t| Some(t)).collect();
-
-    let mrl = MultiResultList::new(trees.len());
-    diff_tree(&trees_to_diff, &mrl, 0)?;
-    //println!("{:?}",mrl);
-
-    // println!("{}", mrl.dump_to_csv_str().unwrap());
-
-    Ok(mrl.dump_to_csv_str()?)
-}
-
 /// Parse a XML str and dump it into a CSV file
 pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
     let mut reader = Reader::from_str(xml_data);
@@ -477,7 +399,7 @@ pub fn parse_from_str_to_str(xml_data: &str) -> anyhow::Result<String> {
 }
 
 /// Dump a ResultList into a single CSV file
-fn dump_csv_file(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
+pub fn dump_csv_file(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
     //let mut wtr = csv::Writer::from_writer(io::stdout());
     let mut wtr = csv::Writer::from_path(csv_file)?;
 
@@ -496,7 +418,7 @@ fn dump_csv_file(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
 
 /// Dump a ResultList into a single CSV String
 /// TODO combine with above
-fn dump_csv_to_str(results: &ResultList) -> anyhow::Result<String> {
+pub fn dump_csv_to_str(results: &ResultList) -> anyhow::Result<String> {
     let mut wtr = Writer::from_writer(vec![]);
     wtr.write_record(["Type", "Name", "Result"])?;
     for child in results.list.borrow().iter() {
@@ -512,7 +434,7 @@ fn dump_csv_to_str(results: &ResultList) -> anyhow::Result<String> {
 }
 
 /// Dump an Element tree into a flat ResultList
-fn dump_flat(element: &Element, results: &mut ResultList) {
+pub fn dump_flat(element: &Element, results: &mut ResultList) {
     debug!("Flat Dump:");
     //println!("{:?}; {}", element.et, element.name);
     results.list.borrow_mut().push(ElementFlat {

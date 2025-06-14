@@ -3,6 +3,7 @@ use std::fs;
 use anyhow::{self, Context};
 use clap::{Parser, Subcommand};
 
+mod blend_results;
 mod element;
 mod multi_result_list;
 mod rf_parser;
@@ -40,7 +41,7 @@ fn main() -> anyhow::Result<()> {
         }
         Commands::Blend { input, output } => {
             println!("Blending {:?} {}", input, output);
-            rf_parser::blend_and_save(input, output)?;
+            blend_results::blend_and_save(input, output)?;
         }
     }
     Ok(())
