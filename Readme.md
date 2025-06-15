@@ -7,6 +7,8 @@ Currently under heavy development.
 
 At current it can parse output.xml files and convert them into flat lists of
 calls and csv files.
+Also some basic blending functionality and output formats csv and ods are
+in an experimental stage.
 
 # Run
 
