@@ -31,8 +31,6 @@ pub fn blend_and_save_to_csv(xml_files: &Vec<String>, csv_file: &str) -> anyhow:
     buffer.write(result.as_bytes())?;
 
     #[cfg(feature = "odson")]
-    export_to_ods();
-
     Ok(())
 }
 
@@ -91,58 +89,4 @@ pub fn blend(xml_data: &Vec<String>) -> anyhow::Result<String> {
     // println!("{}", mrl.dump_to_csv_str().unwrap());
     mrl.export_to_ods();
     Ok(mrl.dump_to_csv_str()?)
-}
-
-#[cfg(feature = "odson")]
-use icu_locid::locale;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::color::Rgb;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::defaultstyles::DefaultFormat;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::format;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::formula;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::mm;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::style::units::{Border, TextRelief};
-#[cfg(feature = "odson")]
-use spreadsheet_ods::style::CellStyle;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::{pt, Sheet, Value, WorkBook};
-
-#[cfg(feature = "odson")]
-pub fn export_to_ods() {
-    fs::create_dir_all("test_out").expect("create_dir");
-
-    // let path = std::path::Path::new("test_out/lib_example.ods");
-    // let mut wb = if path.exists() {
-    // spreadsheet_ods::read_ods(path).unwrap()
-    // } else {
-    let mut wb = WorkBook::new(locale!("en_US"));
-    // };
-
-    let mut pass_style = CellStyle::new("header", &DefaultFormat::default());
-    pass_style.set_font_bold();
-    pass_style.set_background_color(Rgb::new(0x90, 0xee, 0x90));
-    pass_style.set_font_size(pt!(8));
-    // 90ee900 // lightgreen
-    // ffbcc8 // lightpink
-    // add8e6 // lightblue
-    // if wb.num_sheets() == 0 {
-    let ref_pass = wb.add_cellstyle(pass_style);
-    let mut sheet = Sheet::new("one");
-    sheet.set_value(0, 0, true);
-    sheet.set_value(1, 0, "so zeug da");
-    sheet.set_cellstyle(1, 0, &ref_pass);
-    sheet.set_cellstyle(2, 0, &ref_pass);
-    sheet.set_value(2, 0, "so zeug da");
-    sheet.set_cellstyle(3, 0, &ref_pass);
-    sheet.set_value(1, 0, "so zeug da");
-    sheet.set_value(3, 5, "so zeug da");
-    wb.push_sheet(sheet);
-    // }
-
-    spreadsheet_ods::write_ods(&mut wb, "test_out/lib_example.ods").expect("write_ods");
 }

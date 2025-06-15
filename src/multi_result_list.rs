@@ -20,6 +20,7 @@ impl MultiResultList {
             width,
         }
     }
+    #[allow(dead_code)]
     pub fn push(&self, value: Vec<Option<ElementFlat>>) -> anyhow::Result<()> {
         if value.len() == self.width {
             self.list.borrow_mut().push(value);
@@ -71,24 +72,19 @@ impl MultiResultList {
 
 #[cfg(feature = "odson")]
 use icu_locid::locale;
+
 #[cfg(feature = "odson")]
 use spreadsheet_ods::color::Rgb;
 #[cfg(feature = "odson")]
 use spreadsheet_ods::defaultstyles::DefaultFormat;
 #[cfg(feature = "odson")]
-use spreadsheet_ods::format;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::formula;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::mm;
-#[cfg(feature = "odson")]
-use spreadsheet_ods::style::units::{Border, TextRelief};
-#[cfg(feature = "odson")]
 use spreadsheet_ods::style::CellStyle;
 #[cfg(feature = "odson")]
-use spreadsheet_ods::{pt, Sheet, Value, WorkBook};
+use spreadsheet_ods::{pt, Sheet, WorkBook};
 
 impl MultiResultList {
+    /// Experimental ods export
+    /// there are many todos hidden here
     #[cfg(feature = "odson")]
     pub fn export_to_ods(&self) {
         fs::create_dir_all("test_out").expect("create_dir");

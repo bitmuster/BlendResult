@@ -385,6 +385,7 @@ pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
 
 /// Parse a XML str and dump it into a CSV str
 /// TODO combine with parse above
+#[allow(dead_code)]
 pub fn parse_from_str_to_str(xml_data: &str) -> anyhow::Result<String> {
     let mut reader = Reader::from_str(xml_data);
     reader.config_mut().trim_text(true);
