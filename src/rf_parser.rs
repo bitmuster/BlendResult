@@ -48,8 +48,8 @@ fn get_attribute_kv(decoder: Decoder, a: Result<Attribute, AttrError>) -> (Strin
     {
         value = a
             .unwrap()
-            .decode_and_unescape_value_with(decoder, |_| None)
-            .unwrap();
+            .decode_and_unescape_value(decoder)
+            .expect("decode_and_unescape_value");
     }
     #[cfg(not(feature = "odson"))]
     {
