@@ -17,6 +17,7 @@ in an experimental stage.
     cargo test test_parser_c -- --show-output
     RUST_LOG=debug cargo test test_parser_c -- --show-output
     RUST_LOG=debug cargo test create_elements -- --show-output
+    cargo run -- blend 4 stuff.csv robot/results/*.xml
 
 # Setup
 

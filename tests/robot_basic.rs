@@ -189,9 +189,11 @@ fn test_parser_c() -> anyhow::Result<()> {
         fs::read_to_string(filename3).unwrap(),
     ];
 
-    let result = blend(&xmls, 0)?;
+    let mrl = blend(&xmls, 0)?;
     // println!("{:?}",result);
     let expect = fs::read_to_string("robot/test_parser_c_expect.txt").unwrap();
+
+    let result = mrl.dump_to_csv_str()?;
     assert_eq!(expect, result);
 
     let _ok = blend_and_save_to_csv(&files, csv_file_blend, 0)?;

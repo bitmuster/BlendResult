@@ -29,7 +29,9 @@ pub fn blend_and_save_to_csv(
             .push(fs::read_to_string(xml_file).context(format!("File not found {}", xml_file))?);
     }
 
-    let result = blend(&xml_data, max_depth)?;
+    let mrl = blend(&xml_data, max_depth)?;
+    mrl.export_to_ods();
+    let result = mrl.dump_to_csv_str()?;
 
     let mut buffer = File::create(csv_file)?;
     buffer.write(result.as_bytes())?;
@@ -39,7 +41,7 @@ pub fn blend_and_save_to_csv(
 }
 
 /// Blend XML data into a multiresult list and generate a CSV string
-pub fn blend(xml_data: &Vec<String>, max_depth: usize) -> anyhow::Result<String> {
+pub fn blend(xml_data: &Vec<String>, max_depth: usize) -> anyhow::Result<MultiResultList> {
     let mut trees: Vec<Element> = Vec::new();
     let mut results: Vec<ResultList> = Vec::new();
     let mut stats: Vec<ParserStats> = Vec::new();
@@ -91,6 +93,5 @@ pub fn blend(xml_data: &Vec<String>, max_depth: usize) -> anyhow::Result<String>
     //println!("{:?}",mrl);
 
     // println!("{}", mrl.dump_to_csv_str().unwrap());
-    mrl.export_to_ods();
-    Ok(mrl.dump_to_csv_str()?)
+    Ok(mrl)
 }
