@@ -265,7 +265,12 @@ pub fn diff_tree(
     elements: &[Option<&Element>],
     mrl: &MultiResultList,
     depth: usize,
+    max_depth: usize,
 ) -> anyhow::Result<()> {
+    if depth > max_depth && max_depth != 0 {
+        return Ok(());
+    }
+
     let len = elements.len();
 
     // temporary values to store our borrowed children Vec
@@ -344,7 +349,7 @@ pub fn diff_tree(
         };
 
         println!("{}", state);
-        diff_tree(&velem, &mrl, depth + 1)?;
+        diff_tree(&velem, &mrl, depth + 1, max_depth)?;
     }
     Ok(())
 }
@@ -362,7 +367,7 @@ pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
         result: ResultType::None,
         name: String::new(),
     };
-    let mut stats = ParserStats { max_depth: 0 };
+    let mut stats = ParserStats { max_depth: 3 };
 
     parse_inner(&mut reader, &mut root_element, depth, &mut stats)?;
 
