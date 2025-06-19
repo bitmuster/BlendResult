@@ -4,6 +4,7 @@ use std::rc::{Rc, Weak};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ElementType {
+    File,
     Robot,
     Suite,
     Test,

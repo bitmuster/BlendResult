@@ -189,7 +189,7 @@ fn test_parser_c() -> anyhow::Result<()> {
         fs::read_to_string(filename3).unwrap(),
     ];
 
-    let mrl = blend(&xmls, 0)?;
+    let mrl = blend(&xmls, &files, 0)?;
     // println!("{:?}",result);
     let expect = fs::read_to_string("robot/test_parser_c_expect.txt").unwrap();
 

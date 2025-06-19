@@ -1,4 +1,5 @@
 Type 0,Name 0,Result 0,Type 1,Name 1,Result 1,Type 2,Name 2,Result 2
+File,robot/results/output_c_pass.xml,None,File,robot/results/output_c_fail.xml,None,File,robot/results/output_c_pass.xml,None
 Suite,Test C,Pass,Suite,Test C,Fail,Suite,Test C,Pass
 Test,Demo Test A,Pass,Test,Demo Test A,Pass,Test,Demo Test A,Pass
 Keyword,Keyword A,Pass,Keyword,Keyword A,Pass,Keyword,Keyword A,Pass
