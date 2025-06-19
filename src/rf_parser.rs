@@ -320,6 +320,7 @@ pub fn diff_tree(
                         et: s.et.clone(),
                         result: s.result.clone(),
                         name: s.name.clone(),
+                        depth,
                     }));
                     state.push_str(&format!(
                         "{:<16} {:<16?} {:<16} ",
@@ -465,19 +466,21 @@ pub fn dump_flat(element: &Element, results: &mut ResultList) {
         et: element.et.clone(),
         name: element.name.clone(),
         result: element.result.clone(),
+        depth: 0,
     });
-    dump_flat_inner(element, results);
+    dump_flat_inner(element, results, 1);
 }
 
 /// Internas of dumping an Element tree into a flat ResultList
-fn dump_flat_inner(element: &Element, results: &mut ResultList) {
+fn dump_flat_inner(element: &Element, results: &mut ResultList, depth: usize) {
     for child in element.children.borrow().iter() {
         debug!("{:?}; {}; {:?}", child.et, child.name, child.result);
         results.list.borrow_mut().push(ElementFlat {
             et: child.et.clone(),
             name: child.name.clone(),
             result: child.result.clone(),
+            depth,
         });
-        dump_flat_inner(child, results);
+        dump_flat_inner(child, results, depth + 1);
     }
 }

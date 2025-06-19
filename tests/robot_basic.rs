@@ -21,36 +21,43 @@ fn test_parser_a() -> anyhow::Result<()> {
                 et: ElementType::Robot,
                 result: ResultType::None,
                 name: String::from(""),
+                depth: 0,
             },
             ElementFlat {
                 et: ElementType::Suite,
                 result: ResultType::Pass,
                 name: String::from("Test A"),
+                depth: 1,
             },
             ElementFlat {
                 et: ElementType::Test,
                 result: ResultType::Pass,
                 name: String::from("Demo Test A"),
+                depth: 2,
             },
             ElementFlat {
                 et: ElementType::Keyword,
                 result: ResultType::Pass,
                 name: String::from("No Operation"),
+                depth: 3,
             },
             ElementFlat {
                 et: ElementType::Test,
                 result: ResultType::Pass,
                 name: String::from("Demo Test B"),
+                depth: 2,
             },
             ElementFlat {
                 et: ElementType::Keyword,
                 result: ResultType::Pass,
                 name: String::from("Keyword B"),
+                depth: 3,
             },
             ElementFlat {
                 et: ElementType::Keyword,
                 result: ResultType::Pass,
                 name: String::from("No Operation"),
+                depth: 4,
             },
         ])),
     };

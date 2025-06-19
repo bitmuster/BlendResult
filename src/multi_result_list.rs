@@ -7,6 +7,8 @@ use anyhow::anyhow;
 
 use crate::element::{ElementFlat, ResultType};
 
+/// Multiple results merged together as matrix of flat elements.
+/// When the keyword is not executed it is None.
 #[derive(Debug)]
 pub struct MultiResultList {
     pub list: Rc<RefCell<Vec<Vec<Option<ElementFlat>>>>>,
@@ -199,6 +201,7 @@ mod test_multi_result_list {
             et: ElementType::Suite,
             result: ResultType::Pass,
             name: "a suite".to_string(),
+            depth: 42,
         })])?;
         println!("{:?}", mrl);
         let result = mrl.list.borrow();
@@ -220,6 +223,7 @@ mod test_multi_result_list {
                 et: ElementType::Suite,
                 result: ResultType::Pass,
                 name: "a suite".to_string(),
+                depth: 10,
             }),
             None,
         ])?;
@@ -228,11 +232,13 @@ mod test_multi_result_list {
                 et: ElementType::Suite,
                 result: ResultType::Pass,
                 name: "a suite".to_string(),
+                depth: 10,
             }),
             Some(ElementFlat {
                 et: ElementType::Keyword,
                 result: ResultType::Fail,
                 name: "another suite".to_string(),
+                depth: 10,
             }),
         ])?;
         println!("{:?}", mrl);

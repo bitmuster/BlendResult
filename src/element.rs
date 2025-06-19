@@ -54,6 +54,7 @@ pub struct ElementFlat {
     pub et: ElementType,
     pub result: ResultType,
     pub name: String,
+    pub depth: usize,
 }
 
 #[derive(Debug)]
