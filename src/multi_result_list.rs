@@ -125,24 +125,30 @@ impl MultiResultList {
         let ref_skip = wb.add_cellstyle(skip_style);
         let ref_notrun = wb.add_cellstyle(notrun_style);
         let mut sheet = Sheet::new("Results");
-
+        let width = 4; // Amount of entries for each test analyzed testfile
         for result in 0..self.width {
-            sheet.set_value(0, result as u32 * 3 + 0, format!("Type {result}"));
-            sheet.set_value(0, result as u32 * 3 + 1, format!("Name {result}"));
-            sheet.set_value(0, result as u32 * 3 + 2, format!("Result {result}"));
+            sheet.set_value(0, result as u32 * width + 0, format!("Type {result}"));
+            sheet.set_value(0, result as u32 * width + 1, format!("Name {result}"));
+            sheet.set_value(0, result as u32 * width + 2, format!("Result {result}"));
+            sheet.set_value(0, result as u32 * width + 3, format!("Depth {width}"));
         }
         let mut child_num = 0;
         for child in self.list.borrow().iter() {
             for result in 0..self.width {
                 match child[result].as_ref() {
                     Some(r) => {
-                        sheet.set_value(child_num, result as u32 * 3 + 0, format!("{:?}", r.et));
-                        sheet.set_value(child_num, result as u32 * 3 + 1, r.name.to_string());
                         sheet.set_value(
                             child_num,
-                            result as u32 * 3 + 2,
+                            result as u32 * width + 0,
+                            format!("{:?}", r.et),
+                        );
+                        sheet.set_value(child_num, result as u32 * width + 1, r.name.to_string());
+                        sheet.set_value(
+                            child_num,
+                            result as u32 * width + 2,
                             format!("{:?}", r.result),
                         );
+                        sheet.set_value(child_num, result as u32 * width + 3, r.depth.to_string());
                         let style = match r.result {
                             ResultType::Pass => &ref_pass,
                             ResultType::Fail => &ref_fail,
@@ -150,14 +156,16 @@ impl MultiResultList {
                             ResultType::Skip => &ref_skip,
                             _ => &ref_no,
                         };
-                        sheet.set_cellstyle(child_num, result as u32 * 3 + 0, style);
-                        sheet.set_cellstyle(child_num, result as u32 * 3 + 1, style);
-                        sheet.set_cellstyle(child_num, result as u32 * 3 + 2, style);
+                        sheet.set_cellstyle(child_num, result as u32 * width + 0, style);
+                        sheet.set_cellstyle(child_num, result as u32 * width + 1, style);
+                        sheet.set_cellstyle(child_num, result as u32 * width + 2, style);
+                        sheet.set_cellstyle(child_num, result as u32 * width + 3, style);
                     }
                     None => {
-                        sheet.set_value(child_num, result as u32 * 3 + 0, "-");
-                        sheet.set_value(child_num, result as u32 * 3 + 1, "-");
-                        sheet.set_value(child_num, result as u32 * 3 + 2, "-");
+                        sheet.set_value(child_num, result as u32 * width + 0, "-");
+                        sheet.set_value(child_num, result as u32 * width + 1, "-");
+                        sheet.set_value(child_num, result as u32 * width + 2, "-");
+                        sheet.set_value(child_num, result as u32 * width + 3, "-");
                     }
                 }
             }
