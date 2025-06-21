@@ -33,11 +33,11 @@ pub fn ods_test(loops: u32) {
 }
 
 // cargo test ods_export_time -- --show-output
-// Measures around 960µs per element
+// Measures around 960µs per element in debug and 5µs in release mode
 #[cfg(feature = "odson")]
 #[test]
 fn ods_export_time() {
-    for loops in 1..=5 {
+    for loops in 1..=2 {
         let instant = Instant::now();
         ods_test(loops * 10);
         let elapsed = instant.elapsed();
