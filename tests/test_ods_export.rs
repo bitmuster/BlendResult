@@ -17,12 +17,12 @@ use spreadsheet_ods::style::CellStyle;
 #[cfg(feature = "odson")]
 use spreadsheet_ods::{Sheet, WorkBook};
 
-pub fn ods_test() {
+pub fn ods_test(loops: u32) {
     let mut wb = WorkBook::new(locale!("en_US"));
 
     let mut sheet = Sheet::new("one");
 
-    for i in 1..100 {
+    for i in 1..loops {
         for j in 1..100 {
             sheet.set_value(i, j, 42);
         }
@@ -36,8 +36,10 @@ pub fn ods_test() {
 #[cfg(feature = "odson")]
 #[test]
 fn ods_export_time() {
-    let instant = Instant::now();
-    ods_test();
-    let elapsed = instant.elapsed();
-    println!("Elapsed: {elapsed:?}");
+    for loops in [1, 10, 20, 30, 40, 50, 100, 200, 300].iter() {
+        let instant = Instant::now();
+        ods_test(*loops);
+        let elapsed = instant.elapsed();
+        println!("Elapsed {loops} : {elapsed:?}");
+    }
 }
