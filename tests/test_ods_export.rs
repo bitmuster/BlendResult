@@ -33,13 +33,19 @@ pub fn ods_test(loops: u32) {
 }
 
 // cargo test ods_export_time -- --show-output
+// Measures around 960µs per element
 #[cfg(feature = "odson")]
 #[test]
 fn ods_export_time() {
-    for loops in [1, 10, 20, 30, 40, 50, 100, 200, 300].iter() {
+    for loops in 1..=5 {
         let instant = Instant::now();
-        ods_test(*loops);
+        ods_test(loops * 10);
         let elapsed = instant.elapsed();
-        println!("Elapsed {loops} : {elapsed:?}");
+        println!(
+            "Elements {} : {:?} : ms per element {:?}",
+            loops * 10 * 100,
+            elapsed,
+            elapsed / (loops * 1000)
+        );
     }
 }
