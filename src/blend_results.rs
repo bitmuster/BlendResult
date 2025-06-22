@@ -30,7 +30,7 @@ pub fn blend_and_save_to_csv(
     }
 
     let mrl = blend(&xml_data, &xml_files, max_depth)?;
-    mrl.export_to_ods();
+    let _data = mrl.export_to_ods()?;
     let result = mrl.dump_to_csv_str()?;
 
     let mut buffer = File::create(csv_file)?;

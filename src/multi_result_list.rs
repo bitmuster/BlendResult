@@ -88,7 +88,7 @@ impl MultiResultList {
     /// Experimental ods export
     /// there are many todos hidden here
     #[cfg(feature = "odson")]
-    pub fn export_to_ods(&self) {
+    pub fn export_to_ods(&self) -> anyhow::Result<Vec<u8>> {
         fs::create_dir_all("test_out").expect("create_dir");
 
         // let path = std::path::Path::new("test_out/lib_example.ods");
@@ -172,8 +172,10 @@ impl MultiResultList {
             child_num += 1;
         }
         wb.push_sheet(sheet);
-
+        let buf: Vec<u8> = Vec::new();
         spreadsheet_ods::write_ods(&mut wb, "export.ods").expect("write_ods");
+        let result = spreadsheet_ods::write_ods_buf(&mut wb, buf)?;
+        Ok(result)
     }
 }
 #[cfg(test)]
