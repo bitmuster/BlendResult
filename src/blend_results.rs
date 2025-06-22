@@ -30,13 +30,15 @@ pub fn blend_and_save_to_csv(
     }
 
     let mrl = blend(&xml_data, &xml_files, max_depth)?;
+
+    #[cfg(feature = "odson")]
     let _data = mrl.export_to_ods()?;
+
     let result = mrl.dump_to_csv_str()?;
 
     let mut buffer = File::create(csv_file)?;
     buffer.write(result.as_bytes())?;
 
-    #[cfg(feature = "odson")]
     Ok(())
 }
 
@@ -109,5 +111,6 @@ pub fn blend(
     //println!("{:?}",mrl);
 
     // println!("{}", mrl.dump_to_csv_str().unwrap());
+    debug!("Finalised blending");
     Ok(mrl)
 }

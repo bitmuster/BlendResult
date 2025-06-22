@@ -17,6 +17,7 @@ use spreadsheet_ods::style::CellStyle;
 #[cfg(feature = "odson")]
 use spreadsheet_ods::{Sheet, WorkBook};
 
+#[cfg(feature = "odson")]
 pub fn ods_test(loops: u32) {
     let mut wb = WorkBook::new(locale!("en_US"));
 
