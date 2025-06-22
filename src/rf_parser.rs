@@ -266,6 +266,7 @@ pub fn diff_tree(
     mrl: &MultiResultList,
     depth: usize,
     max_depth: usize,
+    quiet: bool,
 ) -> anyhow::Result<()> {
     if depth > max_depth && max_depth != 0 {
         return Ok(());
@@ -349,8 +350,10 @@ pub fn diff_tree(
             mrlb.push(elf);
         };
 
-        println!("{}", state);
-        diff_tree(&velem, &mrl, depth + 1, max_depth)?;
+        if !quiet {
+            println!("{}", state);
+        }
+        diff_tree(&velem, &mrl, depth + 1, max_depth, quiet)?;
     }
     Ok(())
 }

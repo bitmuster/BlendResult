@@ -105,7 +105,7 @@ pub fn blend(
         })
         .collect();
     mrl.push(header)?;
-    diff_tree(&trees_to_diff, &mrl, 0, max_depth)?;
+    diff_tree(&trees_to_diff, &mrl, 0, max_depth, true)?;
     //println!("{:?}",mrl);
 
     // println!("{}", mrl.dump_to_csv_str().unwrap());
