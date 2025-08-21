@@ -36,7 +36,8 @@ fn main() -> anyhow::Result<()> {
     match &cli.command {
         Commands::Parse { filename, output } => {
             println!("Parsing {}", filename.as_ref().unwrap());
-            let xml = fs::read_to_string(filename.as_ref().unwrap()).context("Reading failed")?;
+            let xml = fs::read_to_string(filename.as_ref().unwrap())
+                .context("Reading failed")?;
             rf_parser::parse(&xml, &output.as_ref().unwrap())?;
         }
         Commands::Blend {

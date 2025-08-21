@@ -46,7 +46,9 @@ pub struct Element {
 
 impl PartialEq for Element {
     fn eq(&self, other: &Self) -> bool {
-        self.et == other.et && self.children == other.children && self.result == other.result
+        self.et == other.et
+            && self.children == other.children
+            && self.result == other.result
     }
 }
 
@@ -66,7 +68,8 @@ pub struct ResultList {
 impl PartialEq for ResultList {
     fn eq(&self, other: &Self) -> bool {
         let mut equal = true;
-        for (a, b) in self.list.borrow().iter().zip(other.list.borrow().iter()) {
+        for (a, b) in self.list.borrow().iter().zip(other.list.borrow().iter())
+        {
             if a == b {
             } else {
                 equal = false;

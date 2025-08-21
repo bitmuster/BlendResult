@@ -17,7 +17,9 @@ use quick_xml::events::attributes::{AttrError, Attribute};
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
 
-use crate::element::{Element, ElementFlat, ElementType, ResultList, ResultType};
+use crate::element::{
+    Element, ElementFlat, ElementType, ResultList, ResultType,
+};
 use crate::multi_result_list::MultiResultList;
 
 #[allow(dead_code)]
@@ -41,8 +43,12 @@ impl From<AttrError> for AppError {
 
 /// Convert Attribute to key and value
 /// TODO: Can we change the return type to e.g. back to Cow and &str?
-fn get_attribute_kv(decoder: Decoder, a: Result<Attribute, AttrError>) -> (String, String) {
-    let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner()).unwrap();
+fn get_attribute_kv(
+    decoder: Decoder,
+    a: Result<Attribute, AttrError>,
+) -> (String, String) {
+    let key = str::from_utf8(a.clone().unwrap().key.local_name().into_inner())
+        .unwrap();
     let value;
     #[cfg(feature = "odson")]
     {
@@ -59,7 +65,11 @@ fn get_attribute_kv(decoder: Decoder, a: Result<Attribute, AttrError>) -> (Strin
 }
 
 /// Print all XML attributes
-fn print_attributes(decoder: Decoder, ident: &str, attr: attributes::Attributes) {
+fn print_attributes(
+    decoder: Decoder,
+    ident: &str,
+    attr: attributes::Attributes,
+) {
     for a in attr {
         let (key, value) = get_attribute_kv(decoder, a);
         debug!("{ident}    Attr: {:?} {:?}", key, value);
@@ -68,7 +78,11 @@ fn print_attributes(decoder: Decoder, ident: &str, attr: attributes::Attributes)
 
 /// Return the value of an XML attribute by the attribute name.
 /// Otherwise return an empty string.
-fn get_attr_name<'a>(decoder: Decoder, name: &'a str, attr: attributes::Attributes<'a>) -> String {
+fn get_attr_name<'a>(
+    decoder: Decoder,
+    name: &'a str,
+    attr: attributes::Attributes<'a>,
+) -> String {
     for a in attr {
         let (key, value) = get_attribute_kv(decoder, a);
         if name == key {
@@ -114,7 +128,9 @@ pub fn parse_inner(
     loop {
         let ident = " ".repeat(depth * 4 + 4);
         match reader.read_event_into(&mut buf) {
-            Err(e) => panic!("Error at position {}: {:?}", reader.error_position(), e),
+            Err(e) => {
+                panic!("Error at position {}: {:?}", reader.error_position(), e)
+            }
 
             Ok(Event::Eof) => {
                 // println!("EOF");
@@ -163,7 +179,8 @@ pub fn parse_inner(
                     }
                 }
                 if e.name().as_ref() == b"status" {
-                    let status = get_attr_name(decoder, "status", e.attributes());
+                    let status =
+                        get_attr_name(decoder, "status", e.attributes());
                     debug!("{ident}Got status from Start Element {:?}", status);
                     element.result = status_to_result(&status);
                 }
@@ -231,9 +248,15 @@ pub fn parse_inner(
 
                 print_attributes(decoder, &ident, e.attributes());
                 match element.et {
-                    ElementType::Keyword | ElementType::Suite | ElementType::Test => {
-                        let status = get_attr_name(decoder, "status", e.attributes());
-                        debug!("{ident}Got status from Empty element {:?}", status);
+                    ElementType::Keyword
+                    | ElementType::Suite
+                    | ElementType::Test => {
+                        let status =
+                            get_attr_name(decoder, "status", e.attributes());
+                        debug!(
+                            "{ident}Got status from Empty element {:?}",
+                            status
+                        );
                         element.result = status_to_result(&status);
                     }
                     _ => (),
@@ -275,7 +298,8 @@ pub fn diff_tree(
     let len = elements.len();
 
     // temporary values to store our borrowed children Vec
-    let mut borrowed_children: Vec<Option<Ref<'_, Vec<Rc<Element>>>>> = Vec::new();
+    let mut borrowed_children: Vec<Option<Ref<'_, Vec<Rc<Element>>>>> =
+        Vec::new();
 
     for element in elements.iter() {
         let children = match element {
@@ -334,7 +358,10 @@ pub fn diff_tree(
                 None => {
                     trace!("name: {}-{} None", count, depth);
                     elf.push(None);
-                    state.push_str(&format!("{:<16} {:<16?} {:<16}", "-", "-", "-"));
+                    state.push_str(&format!(
+                        "{:<16} {:<16?} {:<16}",
+                        "-", "-", "-"
+                    ));
                     velem.push(None);
                 }
             }
@@ -427,7 +454,10 @@ pub fn parse_from_str_to_str(xml_data: &str) -> anyhow::Result<String> {
 }
 
 /// Dump a ResultList into a single CSV file
-pub fn dump_csv_file(csv_file: &str, results: &ResultList) -> anyhow::Result<()> {
+pub fn dump_csv_file(
+    csv_file: &str,
+    results: &ResultList,
+) -> anyhow::Result<()> {
     //let mut wtr = csv::Writer::from_writer(io::stdout());
     let mut wtr = csv::Writer::from_path(csv_file)?;
 

@@ -40,8 +40,10 @@ pub fn run_rf_test_with_options(
         } else {
             return Err(anyhow!(
                 "Call on shell failed: stdout:{:?} stderr:{:?} status: {:?}",
-                String::from_utf8(output.stdout).context("Utf8 conversion failed")?,
-                String::from_utf8(output.stderr).context("Utf8 conversion failed")?,
+                String::from_utf8(output.stdout)
+                    .context("Utf8 conversion failed")?,
+                String::from_utf8(output.stderr)
+                    .context("Utf8 conversion failed")?,
                 output.status.code()
             ));
         }
