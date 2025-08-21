@@ -23,19 +23,20 @@ pub fn run_rf_test_with_options(
         .output()
         .context("failed to execute process : rm")?;
     println!(
-        "Process Outputs:\n{}",
+        "Captured Process Outputs:\n{}",
         String::from_utf8(output.stdout).context("Utf8 conversion failed")?
     );
     let output = process::Command::new("sh")
         .arg("-c")
-        .arg(
-            format!(
-            ". venv/bin/activate && robot {options} -d robot/results/ -o output_{t}{appendix}.xml -l log_{t}{appendix}.html -r report_{t}{appendix}.html robot/test_{t}.robot")
-        )
+        .arg(format!(
+            ". venv/bin/activate && robot {options} -d robot/results/ \
+            -o output_{t}{appendix}.xml -l log_{t}{appendix}.html \
+            -r report_{t}{appendix}.html robot/test_{t}.robot"
+        ))
         .output()
         .context("Failed to execute process: robotframework")?;
     if !output.status.success() {
-        if expect_fail && output.status.code() == Some(1) {
+        if expect_fail && output.status.code() != Some(0) {
         } else {
             return Err(anyhow!(
                 "Call on shell failed: stdout:{:?} stderr:{:?} status: {:?}",

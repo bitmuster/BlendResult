@@ -191,7 +191,8 @@ fn test_parser_c() -> anyhow::Result<()> {
 
     let mrl = blend(&xmls, &files, 0)?;
     // println!("{:?}",result);
-    let expect = fs::read_to_string("robot/test_parser_c_expect.txt").unwrap();
+    let expect = fs::read_to_string("robot/test_parser_c_expect.txt")
+        .expect("Reading expectation file failed.");
 
     let result = mrl.dump_to_csv_str()?;
     assert_eq!(expect, result);
