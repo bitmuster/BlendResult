@@ -11,9 +11,13 @@ use log::{debug, trace};
 use anyhow::Context;
 use quick_xml::reader::Reader;
 
-use crate::element::{Element, ElementFlat, ElementType, ResultList, ResultType};
+use crate::element::{
+    Element, ElementFlat, ElementType, ResultList, ResultType,
+};
 use crate::multi_result_list::MultiResultList;
-use crate::rf_parser::{diff_tree, dump_csv_to_str, dump_flat, parse_inner, ParserStats};
+use crate::rf_parser::{
+    diff_tree, dump_csv_to_str, dump_flat, parse_inner, ParserStats,
+};
 
 /// Blend XML files into a multiresult list and write a CSV file
 pub fn blend_and_save_to_csv(
@@ -25,8 +29,10 @@ pub fn blend_and_save_to_csv(
     // Parse input files
     for xml_file in xml_files {
         println!("Parsing {}", xml_file);
-        xml_data
-            .push(fs::read_to_string(xml_file).context(format!("File not found {}", xml_file))?);
+        xml_data.push(
+            fs::read_to_string(xml_file)
+                .context(format!("File not found {}", xml_file))?,
+        );
     }
 
     let mrl = blend(&xml_data, &xml_files, max_depth)?;
@@ -92,7 +98,8 @@ pub fn blend(
         debug!("{csv_str}");
     }
 
-    let trees_to_diff: Vec<Option<&Element>> = trees.iter().map(|t| Some(t)).collect();
+    let trees_to_diff: Vec<Option<&Element>> =
+        trees.iter().map(|t| Some(t)).collect();
 
     let mrl = MultiResultList::new(trees.len());
     let header = xml_files

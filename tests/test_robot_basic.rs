@@ -12,8 +12,10 @@ fn test_parser_a() -> anyhow::Result<()> {
     common::run_rf_test("a")?;
     let filename = "robot/results/output_a.xml";
     let csv_file = "robot/results/output_a.csv";
-    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
-    let results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
+    let xml = fs::read_to_string(filename)
+        .context(format!("File not found {}", filename))?;
+    let results =
+        blend_result::parse(&xml, csv_file).context("Parsing failed")?;
 
     let expect = ResultList {
         list: Rc::new(RefCell::new(vec![
@@ -70,8 +72,10 @@ fn test_parser_b() -> anyhow::Result<()> {
     common::run_rf_test("b")?;
     let filename = "robot/results/output_b.xml";
     let csv_file = "robot/results/output_b.csv";
-    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
-    let _results = blend_result::parse(&xml, csv_file).context("Parsing failed")?;
+    let xml = fs::read_to_string(filename)
+        .context(format!("File not found {}", filename))?;
+    let _results =
+        blend_result::parse(&xml, csv_file).context("Parsing failed")?;
     Ok(())
 }
 #[test]
@@ -79,8 +83,10 @@ fn test_parse_from_str_to_str() -> anyhow::Result<()> {
     common::init_logger();
     common::run_rf_test("b")?;
     let filename = "robot/results/output_b.xml";
-    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
-    let results = blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
+    let xml = fs::read_to_string(filename)
+        .context(format!("File not found {}", filename))?;
+    let results =
+        blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
 
     let expect = "Type,Name,Result\n\
         Robot,,None\n\
@@ -111,10 +117,17 @@ fn test_parse_from_str_to_str() -> anyhow::Result<()> {
 #[test]
 fn test_parse_from_str_to_str_c() -> anyhow::Result<()> {
     common::init_logger();
-    common::run_rf_test_with_options("c", true, "_fail", "--variable failhere:True")?;
+    common::run_rf_test_with_options(
+        "c",
+        true,
+        "_fail",
+        "--variable failhere:True",
+    )?;
     let filename = "robot/results/output_c_fail.xml";
-    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
-    let results = blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
+    let xml = fs::read_to_string(filename)
+        .context(format!("File not found {}", filename))?;
+    let results =
+        blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
 
     let expect = "Type,Name,Result\n\
         Robot,,None\n\
@@ -151,10 +164,17 @@ fn test_parse_from_str_to_str_c() -> anyhow::Result<()> {
 #[test]
 fn test_parse_from_str_to_str_d() -> anyhow::Result<()> {
     common::init_logger();
-    common::run_rf_test_with_options("d", true, "_fail", "--variable failhere:True")?;
+    common::run_rf_test_with_options(
+        "d",
+        true,
+        "_fail",
+        "--variable failhere:True",
+    )?;
     let filename = "robot/results/output_d_fail.xml";
-    let xml = fs::read_to_string(filename).context(format!("File not found {}", filename))?;
-    let results = blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
+    let xml = fs::read_to_string(filename)
+        .context(format!("File not found {}", filename))?;
+    let results =
+        blend_result::parse_from_str_to_str(&xml).context("Parsing failed")?;
 
     let expect = "Type,Name,Result\n\
         Robot,,None\n\
@@ -170,8 +190,18 @@ fn test_parse_from_str_to_str_d() -> anyhow::Result<()> {
 #[test]
 fn test_parser_c() -> anyhow::Result<()> {
     common::init_logger();
-    common::run_rf_test_with_options("c", false, "_pass", "--variable failhere:False")?;
-    common::run_rf_test_with_options("c", true, "_fail", "--variable failhere:True")?;
+    common::run_rf_test_with_options(
+        "c",
+        false,
+        "_pass",
+        "--variable failhere:False",
+    )?;
+    common::run_rf_test_with_options(
+        "c",
+        true,
+        "_fail",
+        "--variable failhere:True",
+    )?;
 
     let filename1 = "robot/results/output_c_pass.xml";
     let filename2 = "robot/results/output_c_fail.xml";
