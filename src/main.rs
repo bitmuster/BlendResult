@@ -4,9 +4,12 @@ use anyhow::{self, Context};
 use clap::{Parser, Subcommand};
 
 mod blend_results;
+mod callgraph;
 mod element;
 mod multi_result_list;
 mod rf_parser;
+
+use callgraph::dot_callgraph;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -27,6 +30,7 @@ enum Commands {
         output: String,
         input: Vec<String>,
     },
+    Graph {},
 }
 
 fn main() -> anyhow::Result<()> {
@@ -46,6 +50,10 @@ fn main() -> anyhow::Result<()> {
         } => {
             println!("Blending {:?} {}", input, output);
             blend_results::blend_and_save_to_csv(input, output, *depth)?;
+        }
+        Commands::Graph {} => {
+            println!("Creating graph");
+            dot_callgraph();
         }
     }
     Ok(())
