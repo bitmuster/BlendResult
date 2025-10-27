@@ -30,45 +30,9 @@ fn stuff() {
     let format = Format::Svg;
 
     let graph_svg = exec_dot(dot, vec![format.clone().into()]).unwrap();
-    fs::File::create("graph.svg").unwrap().write(&graph_svg);
-}
-fn output_test() {
-    let mut g = graph!(id!("id");
-         node!("nod"),
-         subgraph!("sb";
-             edge!(node_id!("a") => subgraph!(;
-                node!("n";
-                NodeAttributes::color(color_name::black), NodeAttributes::shape(shape::egg))
-            ))
-        ),
-        edge!(node_id!("a1") => node_id!(esc "a2"))
-    );
-    let graph_svg = exec(g, &mut PrinterContext::default(), vec![Format::Svg.into()]).unwrap();
-}
-fn output_exec_from_test() {
-    let mut g = graph!(id!("id");
-         node!("nod"),
-         subgraph!("sb";
-             edge!(node_id!("a") => subgraph!(;
-                node!("n";
-                NodeAttributes::color(color_name::black), NodeAttributes::shape(shape::egg))
-            ))
-        ),
-        edge!(node_id!("a1") => node_id!(esc "a2"))
-    );
-    let dot = g.print(&mut PrinterContext::default());
-    println!("{}", dot);
-    let format = Format::Svg;
-
-    let graph_svg = exec_dot(dot.clone(), vec![format.into()]).unwrap();
-
-    let graph_svg = exec_dot(dot, vec![format.clone().into()]).unwrap();
-
-    fs::File::create("output.svg").unwrap().write(&graph_svg);
+    let _ = fs::File::create("graph.svg").unwrap().write(&graph_svg);
 }
 
 pub fn dot_callgraph() {
     stuff();
-    output_test();
-    output_exec_from_test();
 }
