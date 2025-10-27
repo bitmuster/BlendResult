@@ -43,7 +43,17 @@ pub struct Element {
     pub result: ResultType,
     pub name: String,
 }
-
+impl Element {
+    pub fn new() -> Element {
+        Element {
+            et: ElementType::Robot,
+            children: RefCell::new(Vec::new()),
+            parent: RefCell::new(Weak::new()),
+            result: ResultType::None,
+            name: String::new(),
+        }
+    }
+}
 impl PartialEq for Element {
     fn eq(&self, other: &Self) -> bool {
         self.et == other.et

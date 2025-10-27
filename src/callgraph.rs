@@ -1,3 +1,4 @@
+use crate::element::Element;
 /// Example copied from : https://docs.rs/graphviz-rust/0.9.6/graphviz_rust/#examples
 use graphviz_rust;
 use graphviz_rust::dot_generator::*;
@@ -8,11 +9,10 @@ use graphviz_rust::{
     exec, exec_dot, parse,
     printer::{DotPrinter, PrinterContext},
 };
+use std::fs;
 use std::io::prelude::*;
 
-use std::fs;
-
-fn stuff() {
+fn demo() {
     let g = graph!(strict di id!("t");
           node!("aa";attr!("color","green")),
           subgraph!("v";
@@ -33,6 +33,15 @@ fn stuff() {
     let _ = fs::File::create("graph.svg").unwrap().write(&graph_svg);
 }
 
-pub fn dot_callgraph() {
-    stuff();
+pub fn dot_callgraph(xml_data: &str) -> anyhow::Result<()> {
+    demo();
+    let mut reader = fs::Reader::from_str(xml_data);
+    reader.config_mut().trim_text(true);
+
+    let depth = 0;
+    let mut root_element: Element = Element::new();
+    let mut stats = ParserStats { max_depth: 0 };
+
+    parse_inner(&mut reader, &mut root_element, depth, &mut stats)?;
+    Ok(())
 }
