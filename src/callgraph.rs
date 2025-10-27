@@ -8,28 +8,12 @@ use graphviz_rust::{
     exec, exec_dot, parse,
     printer::{DotPrinter, PrinterContext},
 };
+use std::io::prelude::*;
+
+use std::fs;
 
 fn stuff() {
-    let g: Graph = parse(
-        r#"
-        strict digraph t {
-            aa[color=green]
-            subgraph v {
-                aa[shape=square]
-                subgraph vv{a2 -> b2}
-                aaa[color=red]
-                aaa -> bbb
-            }
-            aa -> be -> subgraph v { d -> aaa}
-            aa -> aaa -> v
-        }
-        "#,
-    )
-    .unwrap();
-
-    assert_eq!(
-        g,
-        graph!(strict di id!("t");
+    let g = graph!(strict di id!("t");
           node!("aa";attr!("color","green")),
           subgraph!("v";
             node!("aa"; attr!("shape","square")),
@@ -39,14 +23,14 @@ fn stuff() {
             ),
           edge!(node_id!("aa") => node_id!("be") => subgraph!("v"; edge!(node_id!("d") => node_id!("aaa")))),
           edge!(node_id!("aa") => node_id!("aaa") => node_id!("v"))
-        )
     );
 
-    let mut g = graph!(strict di id!("id"));
-    assert_eq!(
-        "strict digraph id {\n\n}".to_string(),
-        g.print(&mut PrinterContext::default())
-    );
+    let dot = g.print(&mut PrinterContext::default());
+    println!("{}", dot);
+    let format = Format::Svg;
+
+    let graph_svg = exec_dot(dot, vec![format.clone().into()]).unwrap();
+    fs::File::create("graph.svg").unwrap().write(&graph_svg);
 }
 fn output_test() {
     let mut g = graph!(id!("id");
@@ -79,6 +63,8 @@ fn output_exec_from_test() {
     let graph_svg = exec_dot(dot.clone(), vec![format.into()]).unwrap();
 
     let graph_svg = exec_dot(dot, vec![format.clone().into()]).unwrap();
+
+    fs::File::create("output.svg").unwrap().write(&graph_svg);
 }
 
 pub fn dot_callgraph() {
