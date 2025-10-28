@@ -1,5 +1,5 @@
-use crate::element::Element;
-/// Example copied from : https://docs.rs/graphviz-rust/0.9.6/graphviz_rust/#examples
+use crate::element;
+use crate::rf_parser;
 use graphviz_rust;
 use graphviz_rust::dot_generator::*;
 use graphviz_rust::dot_structures::*;
@@ -9,6 +9,9 @@ use graphviz_rust::{
     exec, exec_dot, parse,
     printer::{DotPrinter, PrinterContext},
 };
+use quick_xml;
+/// Example copied from : https://docs.rs/graphviz-rust/0.9.6/graphviz_rust/#examples
+use std::cell;
 use std::fs;
 use std::io::prelude::*;
 
@@ -34,14 +37,24 @@ fn demo() {
 }
 
 pub fn dot_callgraph(xml_data: &str) -> anyhow::Result<()> {
-    demo();
-    let mut reader = fs::Reader::from_str(xml_data);
+    let mut reader = quick_xml::Reader::from_str(xml_data);
     reader.config_mut().trim_text(true);
 
-    let depth = 0;
-    let mut root_element: Element = Element::new();
-    let mut stats = ParserStats { max_depth: 0 };
+    let depth = 1;
+    let mut root_element: element::Element = element::Element::new();
+    let mut stats = rf_parser::ParserStats { max_depth: 0 };
 
-    parse_inner(&mut reader, &mut root_element, depth, &mut stats)?;
+    rf_parser::parse_inner(&mut reader, &mut root_element, depth, &mut stats)?;
+
+    let mut results = element::ResultList {
+        list: std::rc::Rc::new(cell::RefCell::new(Vec::new())),
+    };
+    rf_parser::dump_flat(&root_element, &mut results);
+    let csv = rf_parser::dump_csv_to_str(&results);
+    println!("Parsed {} elements", results.list.borrow().len());
+    println!("Maximum tree depth {}", stats.max_depth);
+    println!("{}", csv.unwrap());
+    demo();
+
     Ok(())
 }

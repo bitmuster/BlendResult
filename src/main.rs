@@ -30,7 +30,9 @@ enum Commands {
         output: String,
         input: Vec<String>,
     },
-    Graph {},
+    Graph {
+        input: String,
+    },
 }
 
 fn main() -> anyhow::Result<()> {
@@ -52,9 +54,9 @@ fn main() -> anyhow::Result<()> {
             println!("Blending {:?} {}", input, output);
             blend_results::blend_and_save_to_csv(input, output, *depth)?;
         }
-        Commands::Graph {} => {
+        Commands::Graph { input } => {
             println!("Creating graph");
-            dot_callgraph();
+            dot_callgraph(input)?;
         }
     }
     Ok(())

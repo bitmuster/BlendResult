@@ -387,7 +387,7 @@ pub fn diff_tree(
 
 /// Parse a XML str and dump it into a CSV file
 pub fn parse(xml_data: &str, csv_file: &str) -> anyhow::Result<ResultList> {
-    let mut reader = Reader::from_str(xml_data);
+    let mut reader = quick_xml::Reader::from_str(xml_data);
     reader.config_mut().trim_text(true);
 
     let depth = 0;
