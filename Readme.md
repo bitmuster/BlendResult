@@ -22,12 +22,19 @@ Blend Files:
 
     cargo run -- blend 4 stuff.csv robot/results/*.xml
 
-Testint with filter:
+Run all Tests:
+
+    cargo test
+
+    cargo test -- --show-output
+
+Testing with filter:
 
     RUST_LOG=debug cargo test test_parser_c -- --show-output
 
 Run the robotframework tests. Be aware, not all of them pass for testing
-purposes (would be boring otherwise).
+purposes (would be boring otherwise). This is necessary only for testing
+the robot framework tests. The Rust tests run robotframework automatically.
 
     robot .
 
