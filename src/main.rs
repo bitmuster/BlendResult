@@ -22,8 +22,9 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Parse {
-        filename: Option<String>,
-        output: Option<String>,
+        filename: String,
+        // output: Option<String>,
+        output: String,
     },
     Blend {
         depth: usize,
@@ -44,10 +45,10 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     match &cli.command {
         Commands::Parse { filename, output } => {
-            println!("Parsing {}", filename.as_ref().unwrap());
-            let xml = fs::read_to_string(filename.as_ref().unwrap())
-                .context("Reading failed")?;
-            rf_parser::parse(&xml, &output.as_ref().unwrap())?;
+            println!("Parsing {}", filename);
+            let xml = fs::read_to_string(filename).context("Reading failed")?;
+            // rf_parser::parse(&xml, &output.as_ref().unwrap())?;
+            rf_parser::parse(&xml, &output)?;
         }
         Commands::Blend {
             input,
