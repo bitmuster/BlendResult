@@ -231,3 +231,19 @@ fn test_parser_c() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn test_parser_regression() -> anyhow::Result<()> {
+    common::init_logger();
+    common::run_rf_test_with_options("regression", false, "", "")?;
+
+    let filename = "robot/results/output_regression.xml";
+    let csv_file = "robot/results/output_b.csv";
+    let xml = fs::read_to_string(filename)
+        .context(format!("File not found {}", filename))?;
+
+    let _results =
+        blend_result::parse(&xml, csv_file).context("Parsing failed")?;
+
+    Ok(())
+}

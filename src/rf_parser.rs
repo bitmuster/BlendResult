@@ -171,7 +171,7 @@ pub fn parse_inner(
                     b"value" => (),
                     b"break" => (),
                     b"status" => (),
-                    // At least in one example a "pattern" appeared here instead of at End
+                    b"variable" => (),
                     b"pattern" => break,
                     s => {
                         warn!("Unmatched {:?}", str::from_utf8(s).unwrap());
