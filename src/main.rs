@@ -36,8 +36,11 @@ enum Commands {
 }
 
 fn main() -> anyhow::Result<()> {
-    //simple_logger::SimpleLogger::new().env().init().unwrap();
-    simple_logger::init_with_level(log::Level::Warn).unwrap();
+    simple_logger::SimpleLogger::new()
+        .with_level(log::LevelFilter::Warn)
+        .env()
+        .init()
+        .unwrap();
     let cli = Cli::parse();
     match &cli.command {
         Commands::Parse { filename, output } => {
