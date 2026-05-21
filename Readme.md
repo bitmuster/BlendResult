@@ -2,10 +2,11 @@
 
 Result blender for robotframework output.xml files.
 
-Currently under heavy development.
+Currently under heavy ... or less heavy development.
 
 At current it can parse output.xml files and convert them into flat lists of
-calls and csv files.
+calls and csv files with results.
+
 Also some basic blending functionality and output formats csv and ods are
 in an experimental stage.
 
@@ -24,6 +25,11 @@ Blend Files:
 Testint with filter:
 
     RUST_LOG=debug cargo test test_parser_c -- --show-output
+
+Run the robotframework tests. Be aware, not all of them pass for testing
+purposes (would be boring otherwise).
+
+    robot .
 
 # Setup
 
